@@ -57,8 +57,11 @@ export class AuthController {
   }
 
   @MessagePattern({ cmd: 'me' })
-  async getMe(@Ctx() context: RmqContext) {
+  async getMe(
+    @Payload() payload: { token: string },
+    @Ctx() context: RmqContext,
+  ) {
     this.sharedService.acknowledgeMessage(context);
-    return 'string';
+    return this.authService.getMe(payload.token);
   }
 }

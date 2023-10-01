@@ -5,6 +5,7 @@ import {
   Inject,
   Post,
   Req,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { AppService } from './app.service';
@@ -45,7 +46,8 @@ export class AppController {
   }
   @UseGuards(AuthGuard)
   @Get('me')
-  async getMe() {
-    return this.authService.send({ cmd: 'me' }, {});
+  async getMe(@Req() request: Request) {
+    const token = request.headers['authorization'].split(' ')[1];
+    return this.authService.send({ cmd: 'me' }, { token });
   }
 }

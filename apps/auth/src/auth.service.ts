@@ -24,7 +24,10 @@ export class AuthService {
       return await bcrypt.hash(password, 12);
     } catch (e) {
       console.error('An error occurred while hashing the password:', e);
-      throw new Error('Internal Server Error');
+      throw new HttpException(
+        'Internal Server Error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -103,7 +106,7 @@ export class AuthService {
     const { email, password } = existingUser;
     const user = await this.validateUser(email, password);
     if (!user) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Invalid email or password!');
     }
     const { access_token, refresh_token } = await this.generateToken(user);
     await this.UserRepository.update(user._id, { r_token: refresh_token });
@@ -156,7 +159,7 @@ export class AuthService {
       return { exp };
     } catch (e) {
       console.log(e);
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Invalid token!');
     }
   }
   async verify_r_jwt(jwt: string) {
@@ -168,7 +171,30 @@ export class AuthService {
       return { exp };
     } catch (e) {
       console.log(e);
+      throw new UnauthorizedException('Invalid token!');
+    }
+  }
+  async getUserFromHeader(jwt: string) {
+    if (!jwt) throw new UnauthorizedException();
+    try {
+      return this.jwtService.decode(jwt);
+    } catch (e) {
+      throw new UnauthorizedException('Invalid token!');
+    }
+  }
+  async getMe(token: string) {
+    if (!token) {
       throw new UnauthorizedException();
     }
+    const payload = await this.getUserFromHeader(token);
+    const user: any = await this.UserRepository.findOneByCondition({
+      _id: payload['user']['_id'],
+    });
+    const { delete_at, r_token, password, created_at, updated_at, ...others } =
+      user._doc;
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+    return others;
   }
 }
