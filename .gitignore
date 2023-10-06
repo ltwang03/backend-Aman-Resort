@@ -2,7 +2,7 @@
 /dist
 /node_modules
 /persistence
-
+.env
 # Logs
 logs
 *.log
