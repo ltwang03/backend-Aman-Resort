@@ -9,6 +9,7 @@ import { Auth_rGuard } from '@app/shared/guards/auth_r.guard';
 @Module({
   imports: [
     SharedModule.registerRmq('AUTH_SERVICE', process.env.RABBITMQ_AUTH_QUEUE),
+    SharedModule.registerRmq('ROOM_SERVICE', process.env.RABBITMQ_ROOM_QUEUE),
   ],
   controllers: [AppController],
   providers: [AppService, AuthGuard, Auth_rGuard],

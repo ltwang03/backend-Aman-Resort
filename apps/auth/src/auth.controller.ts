@@ -1,4 +1,4 @@
-import { Controller, Inject, Req, UseGuards } from '@nestjs/common';
+import { Controller, Inject, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
   Ctx,
@@ -11,7 +11,6 @@ import { NewUserDto } from './dtos/new-user.dto';
 import { ExistingUserDto } from './dtos/existing-user.dto';
 import { JwtGuard } from './jwt.guard';
 import { R_jwtGuard } from './r_jwt.guard';
-import { Request } from 'express';
 
 @Controller()
 export class AuthController {
@@ -63,5 +62,10 @@ export class AuthController {
   ) {
     this.sharedService.acknowledgeMessage(context);
     return this.authService.getMe(payload.token);
+  }
+  @MessagePattern({ cmd: 'decode_jwt' })
+  decode_jwt(@Payload() payload: { jwt: string }, @Ctx() context: RmqContext) {
+    this.sharedService.acknowledgeMessage(context);
+    return this.authService.getUserFromHeader(payload.jwt);
   }
 }
