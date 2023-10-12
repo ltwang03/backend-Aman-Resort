@@ -9,6 +9,8 @@ import {
   RoomTypeRepository,
   SharedModule,
   SharedService,
+  StorageModule,
+  StorageService,
 } from '@app/shared';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Room, RoomSchema } from '@app/shared/schemas/room.schema';
@@ -22,6 +24,7 @@ import { Amenity, AmenitySchema } from '@app/shared/schemas/amenity.schema';
     }),
     SharedModule.registerRmq('AUTH_SERVICE', process.env.RABBITMQ_AUTH_QUEUE),
     MongodbModule,
+    StorageModule,
     MongooseModule.forFeature([
       { name: Room.name, schema: RoomSchema },
       { name: RoomType.name, schema: RoomTypeSchema },

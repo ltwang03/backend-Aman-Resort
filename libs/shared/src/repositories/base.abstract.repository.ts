@@ -1,7 +1,8 @@
 import { BaseEntity } from '@app/shared/repositories/bases/base.entity';
-import { FilterQuery, Model, QueryOptions } from 'mongoose';
+import { FilterQuery, Model, Query, QueryOptions } from 'mongoose';
 import { FindAllResponse } from '@app/shared/repositories/types/common.type';
 import { BaseInterfaceRepository } from '@app/shared/repositories/bases/base.interface.repository';
+import { Room, RoomDocument } from '@app/shared/schemas/room.schema';
 
 export abstract class BaseRepositoryAbstract<T extends BaseEntity>
   implements BaseInterfaceRepository<T>
@@ -19,26 +20,34 @@ export abstract class BaseRepositoryAbstract<T extends BaseEntity>
     return item.deleted_at ? null : item;
   }
 
-  async findOneByCondition(condition = {}): Promise<T> {
+  async findOneByCondition(
+    condition = {},
+    fieldPopulate_1?: string,
+    fieldPopulate_2?: string,
+  ): Promise<any> {
     return await this.model
       .findOne({
         ...condition,
         deleted_at: null,
       })
+      ?.populate(fieldPopulate_1)
+      ?.populate(fieldPopulate_2)
       .exec();
   }
 
-  async findAll(
+  async findAllWithPopulate(
     condition: FilterQuery<T>,
+    fieldPopulate_1?: string,
+    fieldPopulate_2?: string,
     options?: QueryOptions<T>,
   ): Promise<FindAllResponse<T>> {
     const [count, items] = await Promise.all([
       this.model.count({ ...condition, deleted_at: null }),
-      this.model.find(
-        { ...condition, deleted_at: null },
-        options?.projection,
-        options,
-      ),
+      this.model
+        .find({ ...condition, deleted_at: null }, options?.projection, options)
+        ?.populate(fieldPopulate_1)
+        ?.populate(fieldPopulate_2)
+        .exec(),
     ]);
     return { count, items };
   }
@@ -50,6 +59,14 @@ export abstract class BaseRepositoryAbstract<T extends BaseEntity>
       { new: true },
     );
     return updatedData;
+  }
+  async updateList(id: string, dto: Partial<T>): Promise<T> {
+    const updateData = await this.model.findByIdAndUpdate(
+      { _id: id, delete_at: null },
+      { $push: dto },
+      { new: true, omitUndefined: true },
+    );
+    return updateData;
   }
 
   async softDelete(id: string): Promise<boolean> {

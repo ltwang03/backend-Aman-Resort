@@ -11,9 +11,13 @@ import { Room } from '@app/shared/schemas/room.schema';
 })
 export class RoomType extends BaseEntity {
   @Prop({ type: String, required: true })
+  title: string;
+  @Prop({ type: String, required: true })
   name: string;
   @Prop({ type: String, required: true })
   description: string;
+  @Prop({ type: String, required: true })
+  path: string;
   @Prop({ type: [String], required: true })
   inclusion: string[];
   @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Room' }] })

@@ -1,8 +1,10 @@
 //modules
 export * from './modules/shared.module';
 export * from './modules/mongodb.module';
+export * from './modules/storage.module';
 //services
 export * from './services/shared.service';
+export * from './services/storage.service';
 //interfaces
 export * from './interfaces/shared.service.interface';
 //repositories

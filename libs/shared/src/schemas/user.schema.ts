@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { Document, HydratedDocument } from 'mongoose';
+import mongoose, { HydratedDocument } from 'mongoose';
 import { Booking } from '@app/shared/schemas/booking.schema';
 import { BaseEntity } from '@app/shared/repositories/bases/base.entity';
 enum Role {

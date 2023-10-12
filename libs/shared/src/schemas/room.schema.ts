@@ -14,6 +14,8 @@ export class Room extends BaseEntity {
   name: string;
   @Prop({ type: String })
   slug: string;
+  @Prop({ type: String, required: true })
+  description: string;
   @Prop({ type: [String], required: true })
   imageThumbnail: string[];
   @Prop({ type: [String], required: true })
