@@ -175,13 +175,15 @@ export class RoomService {
         { path },
         'rooms',
       );
-      if (!checkPath)
+      if (!checkPath) {
         throw new HttpException('Invalid path', HttpStatus.BAD_REQUEST);
-      checkPath.rooms.map((room) => {
-        if (room.slug != slug) {
-          throw new HttpException('Invalid slug', HttpStatus.BAD_REQUEST);
-        }
-      });
+      }
+
+      const room = checkPath.rooms.find((room) => room.slug === slug);
+      if (!room) {
+        throw new HttpException('Invalid slug', HttpStatus.BAD_REQUEST);
+      }
+
       const data = await this.RoomRepository.findOneByCondition(
         { slug },
         'roomType',
