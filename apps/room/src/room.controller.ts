@@ -76,4 +76,9 @@ export class RoomController {
     this.sharedService.acknowledgeMessage(context);
     return this.roomService.getRoomBySlug(payload.path, payload.slug);
   }
+  @MessagePattern({ cmd: 'get-all-room-types' })
+  async getAllRoomTypes(@Ctx() context: RmqContext) {
+    this.sharedService.acknowledgeMessage(context);
+    return this.roomService.getAllRoomTypes();
+  }
 }

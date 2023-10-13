@@ -126,4 +126,8 @@ export class AppController {
     const { path, slug } = params;
     return this.roomService.send({ cmd: 'get-room-by-slug' }, { path, slug });
   }
+  @Get('room-types/all')
+  async getAllRoomTypes() {
+    return this.roomService.send({ cmd: 'get-all-room-types' }, {});
+  }
 }

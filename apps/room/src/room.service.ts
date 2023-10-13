@@ -195,4 +195,16 @@ export class RoomService {
       return e;
     }
   }
+  async getAllRoomTypes() {
+    try {
+      const data = await this.RoomTypeRepository.findAllWithPopulate({});
+      if (!data) {
+        throw new HttpException('No room type found', HttpStatus.NOT_FOUND);
+      }
+      return data;
+    } catch (e) {
+      if (e instanceof HttpException) return e;
+      return e;
+    }
+  }
 }
