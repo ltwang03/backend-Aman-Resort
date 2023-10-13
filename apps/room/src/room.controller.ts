@@ -31,6 +31,7 @@ export class RoomController {
       title: string;
       name: string;
       description: string;
+      path: string;
       inclusion: string[];
     },
     @Ctx() context: RmqContext,

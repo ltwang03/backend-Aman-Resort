@@ -31,7 +31,7 @@ export class RoomService {
     }
   }
   async createRoomType(payload) {
-    const { title, name, description, inclusion } = payload;
+    const { title, name, path, description, inclusion } = payload;
     try {
       const existingRoomType = await this.RoomTypeRepository.findOneByCondition(
         { name },
@@ -51,6 +51,7 @@ export class RoomService {
       await this.RoomTypeRepository.create({
         title,
         name,
+        path,
         description,
         inclusion,
       });
@@ -145,6 +146,7 @@ export class RoomService {
       if (!data) {
         throw new HttpException('No room found', HttpStatus.NOT_FOUND);
       }
+      return data;
     } catch (e) {
       if (e instanceof HttpException) return e;
       return e;

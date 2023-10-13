@@ -76,10 +76,10 @@ export class AppController {
   @UseGuards(AuthGuard)
   @Post('room/room-types')
   async createRoomType(@Body() newRoomTypeDto: NewRoomTypeDto) {
-    const { title, name, description, inclusion } = newRoomTypeDto;
+    const { title, name, path, description, inclusion } = newRoomTypeDto;
     return this.roomService.send(
       { cmd: 'create-room-type' },
-      { title, name, description, inclusion },
+      { title, name, path, description, inclusion },
     );
   }
   @Roles(Role.ADMIN)

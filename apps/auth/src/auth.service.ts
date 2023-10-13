@@ -103,38 +103,55 @@ export class AuthService {
     return newUser;
   }
   async login(existingUser: Readonly<ExistingUserDto>) {
-    const { email, password } = existingUser;
-    const user = await this.validateUser(email, password);
-    if (!user) {
-      throw new UnauthorizedException('Invalid email or password!');
+    try {
+      const { email, password } = existingUser;
+      const user = await this.validateUser(email, password);
+      if (!user) {
+        throw new HttpException(
+          'Invalid Email or Password',
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+      const { access_token, refresh_token } = await this.generateToken(user);
+      await this.UserRepository.update(user._id, { r_token: refresh_token });
+      return { access_token, refresh_token };
+    } catch (e) {
+      if (e instanceof HttpException) {
+        return { error: e.getResponse(), statusCode: e.getStatus() };
+      }
+      return e;
     }
-    const { access_token, refresh_token } = await this.generateToken(user);
-    await this.UserRepository.update(user._id, { r_token: refresh_token });
-    return { access_token, refresh_token };
   }
 
   async refreshToken(token: string) {
-    const user: any = await this.UserRepository.findOneByCondition({
-      r_token: token,
-    });
-    if (!user) {
-      throw new UnauthorizedException();
-    }
-    const {
-      delete_at,
-      created_at,
-      updated_at,
-      password,
-      __v,
-      r_token,
-      booked,
-      phone,
-      ...newUser
-    } = user._doc;
+    try {
+      const user: any = await this.UserRepository.findOneByCondition({
+        r_token: token,
+      });
+      if (!user) {
+        throw new HttpException('Invalid token!', HttpStatus.UNAUTHORIZED);
+      }
+      const {
+        delete_at,
+        created_at,
+        updated_at,
+        password,
+        __v,
+        r_token,
+        booked,
+        phone,
+        ...newUser
+      } = user._doc;
 
-    const { access_token, refresh_token } = await this.generateToken(newUser);
-    await this.UserRepository.update(user._id, { r_token: refresh_token });
-    return { access_token, refresh_token };
+      const { access_token, refresh_token } = await this.generateToken(newUser);
+      await this.UserRepository.update(user._id, { r_token: refresh_token });
+      return { access_token, refresh_token };
+    } catch (e) {
+      if (e instanceof HttpException) {
+        return { error: e.getResponse(), statusCode: e.getStatus() };
+      }
+      return e;
+    }
   }
 
   async generateToken(user: any) {

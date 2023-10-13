@@ -9,6 +9,9 @@ export class NewRoomTypeDto {
   name: string;
   @IsNotEmpty()
   @IsString()
+  path: string;
+  @IsNotEmpty()
+  @IsString()
   description: string;
   @IsNotEmpty()
   @IsArray()

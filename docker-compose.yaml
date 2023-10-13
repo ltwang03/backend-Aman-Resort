@@ -12,19 +12,19 @@ services:
     volumes:
       - ./persistence/rabbitmq:/var/lib/rabbitmq
 
-  database_mongo:
-    image: mongo:6-jammy
-    container_name: database_mongo
-    hostname: mongodb
-    ports:
-      - '27017:27017'
-    env_file:
-      - .env
-    volumes:
-      - ./persistence/mongo-entrypoint:/docker-entrypoint-initdb.d
-      - ./persistence/mongodb:/data/db
-      - ./persistence/mongoconfig:/data/configdb
+#  database_mongo:
+#    image: mongo:6-jammy
+#    container_name: database_mongo
+#    hostname: mongodb
+#    ports:
+#      - '27017:27017'
+#    env_file:
+#      - .env
+#    volumes:
+#      - ./persistence/mongo-entrypoint:/docker-entrypoint-initdb.d
+#      - ./persistence/mongodb:/data/db
+#      - ./persistence/mongoconfig:/data/configdb
 volumes:
-  mongodb:
-  mongoconfig:
+#  mongodb:
+#  mongoconfig:
   rabbitmq:
