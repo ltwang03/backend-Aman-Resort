@@ -11,6 +11,10 @@ import { RolesGuard } from '@app/shared/guards/roles.guard';
   imports: [
     SharedModule.registerRmq('AUTH_SERVICE', process.env.RABBITMQ_AUTH_QUEUE),
     SharedModule.registerRmq('ROOM_SERVICE', process.env.RABBITMQ_ROOM_QUEUE),
+    SharedModule.registerRmq(
+      'BOOKING_SERVICE',
+      process.env.RABBITMQ_BOOKING_QUEUE,
+    ),
   ],
   controllers: [AppController],
   providers: [AppService, AuthGuard, Auth_rGuard, RolesGuard],

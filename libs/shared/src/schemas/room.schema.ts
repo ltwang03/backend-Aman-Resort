@@ -3,6 +3,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 import { RoomType } from '@app/shared/schemas/roomType.schema';
 import { Amenity } from '@app/shared/schemas/amenity.schema';
+
 @Schema({
   timestamps: {
     createdAt: 'created_at',
@@ -16,6 +17,8 @@ export class Room extends BaseEntity {
   slug: string;
   @Prop({ type: String, required: true })
   description: string;
+  @Prop({ type: String, required: true })
+  size: string;
   @Prop({ type: [String], required: true })
   imageThumbnail: string[];
   @Prop({ type: [String], required: true })
@@ -24,6 +27,14 @@ export class Room extends BaseEntity {
   roomType: RoomType;
   @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Amenity' }] })
   amenities: Amenity[];
+  @Prop({ type: Boolean, default: false })
+  booking: boolean;
+  @Prop({ type: String, required: true })
+  price: string;
+  @Prop({ type: String, required: true })
+  max_adults: string;
+  @Prop({ type: String, required: true })
+  max_children: string;
 }
 export type RoomDocument = HydratedDocument<Room>;
 export const RoomSchema = SchemaFactory.createForClass(Room);

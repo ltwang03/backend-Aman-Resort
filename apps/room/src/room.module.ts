@@ -16,6 +16,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Room, RoomSchema } from '@app/shared/schemas/room.schema';
 import { RoomType, RoomTypeSchema } from '@app/shared/schemas/roomType.schema';
 import { Amenity, AmenitySchema } from '@app/shared/schemas/amenity.schema';
+import { BookingRepository } from '@app/shared/repositories/booking.repository';
+import { Booking, BookingSchema } from '@app/shared/schemas/booking.schema';
+import moment from 'moment';
 
 @Module({
   imports: [
@@ -29,6 +32,7 @@ import { Amenity, AmenitySchema } from '@app/shared/schemas/amenity.schema';
       { name: Room.name, schema: RoomSchema },
       { name: RoomType.name, schema: RoomTypeSchema },
       { name: Amenity.name, schema: AmenitySchema },
+      { name: Booking.name, schema: BookingSchema },
     ]),
   ],
   controllers: [RoomController],
@@ -38,6 +42,11 @@ import { Amenity, AmenitySchema } from '@app/shared/schemas/amenity.schema';
     { provide: 'RoomRepositoryInterface', useClass: RoomRepository },
     { provide: 'RoomTypeRepositoryInterface', useClass: RoomTypeRepository },
     { provide: 'AmenityRepositoryInterface', useClass: AmenityRepository },
+    { provide: 'BookingRepositoryInterface', useClass: BookingRepository },
+    {
+      provide: 'MomentWrapper',
+      useValue: moment,
+    },
   ],
 })
 export class RoomModule {}

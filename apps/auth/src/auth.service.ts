@@ -199,6 +199,16 @@ export class AuthService {
       throw new UnauthorizedException('Invalid token!');
     }
   }
+  async getAllUser() {
+    const data = await this.UserRepository.findAllWithPopulate({
+      role: 'User',
+    });
+    return {
+      status: HttpStatus.OK,
+      message: 'OK',
+      data,
+    };
+  }
   async getMe(token: string) {
     if (!token) {
       throw new UnauthorizedException();

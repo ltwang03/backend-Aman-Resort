@@ -1,13 +1,12 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
   Inject,
   Param,
   Post,
+  Query,
   Req,
-  UploadedFile,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
@@ -24,10 +23,7 @@ import { Roles } from '@app/shared/decorators/roles.decorator';
 import { Role } from '@app/shared/decorators/role.enum';
 import { NewAmenityDto } from './dtos/new-amenity.dto';
 import { NewRoomTypeDto } from './dtos/new-RoomType.dto';
-import {
-  FileFieldsInterceptor,
-  FileInterceptor,
-} from '@nestjs/platform-express';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { NewRoomDto } from './dtos/new-room.dto';
 
 @Controller()
@@ -36,6 +32,7 @@ export class AppController {
     private readonly appService: AppService,
     @Inject('AUTH_SERVICE') private readonly authService: ClientProxy,
     @Inject('ROOM_SERVICE') private readonly roomService: ClientProxy,
+    @Inject('BOOKING_SERVICE') private readonly bookingService: ClientProxy,
   ) {}
 
   @Post('auth/register')
@@ -53,7 +50,7 @@ export class AppController {
   }
 
   @UseGuards(Auth_rGuard)
-  @Get('ath/refresh')
+  @Get('auth/refresh')
   async refresh(@Req() request: Request) {
     const token = request.headers['authorization'].split(' ')[1];
     return this.authService.send({ cmd: 'refresh' }, { token });
@@ -65,6 +62,12 @@ export class AppController {
     return this.authService.send({ cmd: 'me' }, { token });
   }
 
+  @Roles(Role.ADMIN)
+  @UseGuards(AuthGuard)
+  @Get('auth/users')
+  async getAllUsers() {
+    return this.authService.send({ cmd: 'get-all-users' }, {});
+  }
   @Roles(Role.ADMIN)
   @UseGuards(AuthGuard)
   @Post('room/amenities')
@@ -99,16 +102,29 @@ export class AppController {
     },
     @Body() newRoomDto: NewRoomDto,
   ) {
-    const { name, description, roomType, amenities } = newRoomDto;
+    const {
+      name,
+      description,
+      size,
+      roomType,
+      amenities,
+      price,
+      max_adults,
+      max_children,
+    } = newRoomDto;
     return this.roomService.send(
       { cmd: 'create-new-room' },
       {
         name,
         description,
+        size,
         imageThumbnail: files.imageThumbnail,
         imageCover: files.imageCover,
         roomType,
         amenities,
+        price,
+        max_adults,
+        max_children,
       },
     );
   }
@@ -129,5 +145,25 @@ export class AppController {
   @Get('room-types/all')
   async getAllRoomTypes() {
     return this.roomService.send({ cmd: 'get-all-room-types' }, {});
+  }
+  @Post('rooms/booking/search')
+  async searchRoomForBooking(
+    @Query()
+    query: {
+      start: string;
+      end: string;
+      adults?: string;
+      children?: string;
+    },
+  ) {
+    return this.roomService.send(
+      { cmd: 'search-room-for-booking' },
+      {
+        start: query.start,
+        end: query.end,
+        adults: query.adults,
+        children: query.children,
+      },
+    );
   }
 }

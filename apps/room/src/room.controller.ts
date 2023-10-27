@@ -7,7 +7,6 @@ import {
   Payload,
   RmqContext,
 } from '@nestjs/microservices';
-import * as path from 'path';
 
 @Controller()
 export class RoomController {
@@ -45,10 +44,14 @@ export class RoomController {
     payload: {
       name: string;
       description: string;
+      size: string;
       imageThumbnail: Express.Multer.File[];
       imageCover: Express.Multer.File[];
       roomType: string;
       amenities: string[];
+      price: string;
+      max_adults: string;
+      max_children: string;
     },
     @Ctx() context: RmqContext,
   ) {
@@ -80,5 +83,14 @@ export class RoomController {
   async getAllRoomTypes(@Ctx() context: RmqContext) {
     this.sharedService.acknowledgeMessage(context);
     return this.roomService.getAllRoomTypes();
+  }
+  @MessagePattern({ cmd: 'search-room-for-booking' })
+  async SearchRoomForBooking(
+    @Ctx() context: RmqContext,
+    @Payload()
+    payload: { start: string; end: string; adults: string; children: string },
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+    return this.roomService.SearchRoomForBooking(payload);
   }
 }

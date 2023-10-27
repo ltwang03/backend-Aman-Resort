@@ -3,6 +3,11 @@ import { RoomRepositoryInterface } from '@app/shared/interfaces/room.repository.
 import { RoomTypeRepositoryInterface } from '@app/shared/interfaces/roomType.repository.interface';
 import { AmenityRepositoryInterface } from '@app/shared/interfaces/amenity.repository.interface';
 import { StorageService } from '@app/shared';
+import { BookingRepositoryInterface } from '@app/shared/interfaces/booking.repository.interface';
+import { Booking } from '@app/shared/schemas/booking.schema';
+import { Model } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
+const moment = require('moment');
 
 @Injectable()
 export class RoomService {
@@ -13,6 +18,9 @@ export class RoomService {
     private readonly RoomTypeRepository: RoomTypeRepositoryInterface,
     @Inject('AmenityRepositoryInterface')
     private readonly AmenityRepository: AmenityRepositoryInterface,
+    @Inject('BookingRepositoryInterface')
+    private readonly BookingRepository: BookingRepositoryInterface,
+    @InjectModel(Booking.name) private BookingModel: Model<Booking>,
     private readonly storageService: StorageService,
   ) {}
   async createAmenity(name: string) {
@@ -65,17 +73,18 @@ export class RoomService {
     const {
       name,
       description,
+      size,
       imageThumbnail,
       imageCover,
       roomType,
       amenities,
+      price,
+      max_adults,
+      max_children,
     } = payload;
     function slugify(text) {
-      // Chuyển đổi các ký tự có dấu thành ký tự không dấu
       text = text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-      // Loại bỏ các ký tự đặc biệt
       text = text.replace(/[^\w\s-]/g, '');
-      // Thay thế khoảng trắng bằng dấu gạch ngang
       text = text.replace(/\s+/g, '-');
       return text.toLowerCase();
     }
@@ -112,10 +121,14 @@ export class RoomService {
         name,
         slug,
         description,
+        size,
         imageThumbnail: listImageThumbnail,
         imageCover: listImageCover,
         roomType,
         amenities,
+        price,
+        max_adults,
+        max_children,
       });
       const updateRoomType = await this.RoomTypeRepository.updateList(
         roomType,
@@ -205,6 +218,28 @@ export class RoomService {
     } catch (e) {
       if (e instanceof HttpException) return e;
       return e;
+    }
+  }
+  async SearchRoomForBooking(payload) {
+    const { start, end, adults, children } = payload;
+    const formatStartToDate = moment(start, 'DD-MM-YYYY').toDate();
+    const formatEndToDate = moment(end, 'DD-MM-YYYY').toDate();
+
+    try {
+      const unavailableRooms = await this.BookingModel.find({
+        $or: [
+          {
+            $and: [
+              { start: { $lt: formatStartToDate } },
+              { end: { $gte: formatEndToDate } },
+            ],
+            isValidDateRange: true,
+          },
+        ],
+      }).populate('rooms');
+      return unavailableRooms;
+    } catch (error) {
+      throw new Error('Error finding unavailable rooms');
     }
   }
 }

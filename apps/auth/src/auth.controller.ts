@@ -63,6 +63,11 @@ export class AuthController {
     this.sharedService.acknowledgeMessage(context);
     return this.authService.getMe(payload.token);
   }
+  @MessagePattern({ cmd: 'get-all-users' })
+  async getAllUser(@Ctx() context: RmqContext) {
+    this.sharedService.acknowledgeMessage(context);
+    return this.authService.getAllUser();
+  }
   @MessagePattern({ cmd: 'decode_jwt' })
   decode_jwt(@Payload() payload: { jwt: string }, @Ctx() context: RmqContext) {
     this.sharedService.acknowledgeMessage(context);
