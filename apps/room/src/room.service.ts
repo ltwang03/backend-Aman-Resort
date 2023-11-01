@@ -221,25 +221,46 @@ export class RoomService {
     }
   }
   async SearchRoomForBooking(payload) {
-    const { start, end, adults, children } = payload;
+    const { start, end, adults = 0, children = 0 } = payload;
+    if (!payload) {
+      throw new Error('Payload is required');
+    }
+
+    if (!start || !end) {
+      throw new Error('Start and end date are required');
+    }
+    if (adults < 0) {
+      throw new Error('Adults must be a positive number');
+    }
+
+    if (children < 0) {
+      throw new Error('Children must be a positive number');
+    }
+
     const formatStartToDate = moment(start, 'DD-MM-YYYY').toDate();
     const formatEndToDate = moment(end, 'DD-MM-YYYY').toDate();
-
-    try {
-      const unavailableRooms = await this.BookingModel.find({
-        $or: [
-          {
-            $and: [
-              { start: { $lt: formatStartToDate } },
-              { end: { $gte: formatEndToDate } },
-            ],
-            isValidDateRange: true,
-          },
-        ],
-      }).populate('rooms');
-      return unavailableRooms;
-    } catch (error) {
-      throw new Error('Error finding unavailable rooms');
+    if (formatStartToDate >= formatEndToDate) {
+      throw new Error('Start date must be before end date');
     }
+
+    const unavailableRooms: any = await this.BookingModel.find({
+      start: { $gte: formatStartToDate, $lte: formatEndToDate },
+    }).lean();
+    const listRoomReject = unavailableRooms[0].rooms;
+    const roomForBooking = await this.RoomRepository.findAllWithPopulate({
+      _id: { $nin: listRoomReject },
+      max_adults: { $gte: parseInt(adults) },
+      max_children: { $gte: parseInt(children) },
+    });
+    if (!roomForBooking) {
+      return {
+        status: HttpStatus.OK,
+        data: [],
+      };
+    }
+    return {
+      code: HttpStatus.OK,
+      data: roomForBooking,
+    };
   }
 }

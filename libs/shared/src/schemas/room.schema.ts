@@ -31,10 +31,10 @@ export class Room extends BaseEntity {
   booking: boolean;
   @Prop({ type: String, required: true })
   price: string;
-  @Prop({ type: String, required: true })
-  max_adults: string;
-  @Prop({ type: String, required: true })
-  max_children: string;
+  @Prop({ type: Number, required: true })
+  max_adults: number;
+  @Prop({ type: Number, required: true })
+  max_children: number;
 }
 export type RoomDocument = HydratedDocument<Room>;
 export const RoomSchema = SchemaFactory.createForClass(Room);
