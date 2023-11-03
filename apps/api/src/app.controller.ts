@@ -25,6 +25,7 @@ import { NewAmenityDto } from './dtos/new-amenity.dto';
 import { NewRoomTypeDto } from './dtos/new-RoomType.dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { NewRoomDto } from './dtos/new-room.dto';
+import { BookingDto } from './dtos/booking.dto';
 
 @Controller()
 export class AppController {
@@ -163,6 +164,48 @@ export class AppController {
         end: query.end,
         adults: query.adults,
         children: query.children,
+      },
+    );
+  }
+  @Post('bookings')
+  async booking(@Body() bookingDto: BookingDto) {
+    const {
+      firstName,
+      lastName,
+      phone,
+      email,
+      country,
+      address,
+      city,
+      zipCode,
+      note,
+      start,
+      end,
+      adults,
+      children,
+      fee,
+      totalPrice,
+      rooms,
+    } = bookingDto;
+    return this.bookingService.send(
+      { cmd: 'booking' },
+      {
+        firstName,
+        lastName,
+        phone,
+        email,
+        country,
+        address,
+        city,
+        zipCode,
+        note,
+        start,
+        end,
+        adults,
+        children,
+        fee,
+        totalPrice,
+        rooms,
       },
     );
   }

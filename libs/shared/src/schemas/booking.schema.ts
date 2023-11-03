@@ -11,9 +11,9 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 })
 export class Booking extends BaseEntity {
   @Prop({ type: String, required: true })
-  name: string;
-  @Prop({ type: String, required: true })
   firstName: string;
+  @Prop({ type: String, required: true })
+  lastName: string;
   @Prop({ type: String, required: true })
   phone: string;
   @Prop({
@@ -30,14 +30,16 @@ export class Booking extends BaseEntity {
   city: string;
   @Prop({ type: String, required: true })
   zipCode: string;
-  @Prop({ type: String, required: true })
+  @Prop({ type: String })
   note: string;
   @Prop({ type: Date, required: true })
-  check_in: Date;
+  start: Date;
   @Prop({ type: Date, required: true })
-  check_out: Date;
+  end: Date;
   @Prop({ type: Number, required: true })
-  slot: number;
+  adults: number;
+  @Prop({ type: Number, required: true })
+  children: number;
   @Prop({ type: Number, required: true })
   fee: number;
   @Prop({ type: Number, required: true })
