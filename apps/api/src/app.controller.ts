@@ -168,7 +168,7 @@ export class AppController {
     );
   }
   @Post('bookings')
-  async booking(@Body() bookingDto: BookingDto) {
+  async booking(@Body() bookingDto: BookingDto, @Req() req: Request) {
     const {
       firstName,
       lastName,
@@ -187,6 +187,7 @@ export class AppController {
       totalPrice,
       rooms,
     } = bookingDto;
+    const access_token = req?.headers?.authorization.split(' ')[1];
     return this.bookingService.send(
       { cmd: 'booking' },
       {
@@ -206,6 +207,7 @@ export class AppController {
         fee,
         totalPrice,
         rooms,
+        access_token,
       },
     );
   }

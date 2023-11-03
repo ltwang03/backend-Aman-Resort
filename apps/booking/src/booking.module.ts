@@ -7,11 +7,13 @@ import {
   RoomRepository,
   SharedModule,
   SharedService,
+  UserRepository,
 } from '@app/shared';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Room, RoomSchema } from '@app/shared/schemas/room.schema';
 import { Booking, BookingSchema } from '@app/shared/schemas/booking.schema';
 import { BookingRepository } from '@app/shared/repositories/booking.repository';
+import { User, UserSchema } from '@app/shared/schemas/user.schema';
 
 @Module({
   imports: [
@@ -21,6 +23,7 @@ import { BookingRepository } from '@app/shared/repositories/booking.repository';
     MongooseModule.forFeature([
       { name: Room.name, schema: RoomSchema },
       { name: Booking.name, schema: BookingSchema },
+      { name: User.name, schema: UserSchema },
     ]),
   ],
   controllers: [BookingController],
@@ -29,6 +32,7 @@ import { BookingRepository } from '@app/shared/repositories/booking.repository';
     { provide: 'SharedServiceInterface', useClass: SharedService },
     { provide: 'RoomRepositoryInterface', useClass: RoomRepository },
     { provide: 'BookingRepositoryInterface', useClass: BookingRepository },
+    { provide: 'UserRepositoryInterface', useClass: UserRepository },
   ],
 })
 export class BookingModule {}
