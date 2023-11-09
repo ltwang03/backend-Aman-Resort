@@ -5,8 +5,9 @@ import { AmenityRepositoryInterface } from '@app/shared/interfaces/amenity.repos
 import { StorageService } from '@app/shared';
 import { BookingRepositoryInterface } from '@app/shared/interfaces/booking.repository.interface';
 import { Booking } from '@app/shared/schemas/booking.schema';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
+import { Amenity } from '@app/shared/schemas/amenity.schema';
 const moment = require('moment');
 
 @Injectable()
@@ -21,6 +22,7 @@ export class RoomService {
     @Inject('BookingRepositoryInterface')
     private readonly BookingRepository: BookingRepositoryInterface,
     @InjectModel(Booking.name) private BookingModel: Model<Booking>,
+    @InjectModel(Amenity.name) private AmenityModel: Model<Amenity>,
     private readonly storageService: StorageService,
   ) {}
   async createAmenity(name: string) {
@@ -246,12 +248,15 @@ export class RoomService {
     const unavailableRooms: any = await this.BookingModel.find({
       start: { $gte: formatStartToDate, $lte: formatEndToDate },
     }).lean();
-    const listRoomReject = unavailableRooms[0].rooms;
-    const roomForBooking = await this.RoomRepository.findAllWithPopulate({
-      _id: { $nin: listRoomReject },
-      max_adults: { $gte: parseInt(adults) },
-      max_children: { $gte: parseInt(children) },
-    });
+    const listRoomReject = unavailableRooms[0]?.rooms;
+    const roomForBooking = await this.RoomRepository.findAllWithPopulate(
+      {
+        _id: { $nin: listRoomReject },
+        max_adults: { $gte: parseInt(adults) },
+        max_children: { $gte: parseInt(children) },
+      },
+      'roomType',
+    );
     if (!roomForBooking) {
       return {
         status: HttpStatus.OK,
@@ -262,5 +267,42 @@ export class RoomService {
       code: HttpStatus.OK,
       data: roomForBooking,
     };
+  }
+  async deleteRoom(id: string) {
+    if (typeof id !== 'string') {
+      return {
+        message: 'ID not found',
+        code: HttpStatus.NOT_FOUND,
+      };
+    }
+    const room = await this.RoomRepository.findOneById(id);
+    if (!room) {
+      return { message: 'ID not exist!', code: HttpStatus.NOT_FOUND };
+    }
+    try {
+      // await this.RoomTypeRepository.update(room.roomType._id, {
+      //   $pull: { rooms: id },
+      // });
+      // for (const amenity of room.amenities) {
+      //   await this.AmenityRepository.update(amenity._id, {
+      //     $pull: { rooms: id },
+      //   });
+      // }
+      await this.RoomRepository.softDelete(id);
+      return {
+        message: 'Deleted',
+        code: HttpStatus.OK,
+      };
+    } catch (e) {
+      return e;
+    }
+  }
+  async getAmenities() {
+    try {
+      const amenities = await this.AmenityRepository.findAllWithPopulate({});
+      return amenities;
+    } catch (e) {
+      return e;
+    }
   }
 }

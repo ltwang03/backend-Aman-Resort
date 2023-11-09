@@ -1,4 +1,4 @@
-import { IsArray, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsArray, IsNotEmpty, IsString } from 'class-validator';
 
 export class NewRoomDto {
   @IsNotEmpty()
@@ -8,8 +8,7 @@ export class NewRoomDto {
   @IsString()
   description: string;
   @IsNotEmpty()
-  @IsString()
-  size: number;
+  size: string;
   @IsNotEmpty()
   @IsString()
   roomType: string;

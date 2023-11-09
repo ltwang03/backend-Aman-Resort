@@ -10,6 +10,7 @@ import {
   UploadedFiles,
   UseGuards,
   UseInterceptors,
+  Delete,
 } from '@nestjs/common';
 import { AppService } from './app.service';
 
@@ -98,8 +99,8 @@ export class AppController {
   async createRoom(
     @UploadedFiles()
     files: {
-      imageThumbnail?: Express.Multer.File[];
-      imageCover?: Express.Multer.File[];
+      imageThumbnail: Express.Multer.File[];
+      imageCover: Express.Multer.File[];
     },
     @Body() newRoomDto: NewRoomDto,
   ) {
@@ -210,5 +211,15 @@ export class AppController {
         access_token,
       },
     );
+  }
+  @Roles(Role.ADMIN)
+  @UseGuards(AuthGuard)
+  @Delete('rooms/:id')
+  async deleteRoom(@Param('id') id: string) {
+    return this.roomService.send({ cmd: 'delete-room' }, { id });
+  }
+  @Get('amenities')
+  async getAllAmenities() {
+    return this.roomService.send({ cmd: 'get-amenities' }, {});
   }
 }

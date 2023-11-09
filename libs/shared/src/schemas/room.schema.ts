@@ -17,8 +17,8 @@ export class Room extends BaseEntity {
   slug: string;
   @Prop({ type: String, required: true })
   description: string;
-  @Prop({ type: String, required: true })
-  size: string;
+  @Prop({ type: Number, required: true })
+  size: number;
   @Prop({ type: [String], required: true })
   imageThumbnail: string[];
   @Prop({ type: [String], required: true })
@@ -29,8 +29,8 @@ export class Room extends BaseEntity {
   amenities: Amenity[];
   @Prop({ type: Boolean, default: false })
   booking: boolean;
-  @Prop({ type: String, required: true })
-  price: string;
+  @Prop({ type: Number, required: true })
+  price: number;
   @Prop({ type: Number, required: true })
   max_adults: number;
   @Prop({ type: Number, required: true })

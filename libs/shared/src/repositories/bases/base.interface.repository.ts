@@ -19,7 +19,7 @@ export interface BaseInterfaceRepository<T> {
     options?: object,
   ): Promise<FindAllResponse<T>>;
 
-  update(id: string, dto: Partial<T>): Promise<T>;
+  update(id: string, dto): Promise<T>;
 
   updateList(id: string, dto: Partial<T>): Promise<T>;
 

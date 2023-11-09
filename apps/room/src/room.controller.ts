@@ -44,14 +44,14 @@ export class RoomController {
     payload: {
       name: string;
       description: string;
-      size: string;
+      size: number;
       imageThumbnail: Express.Multer.File[];
       imageCover: Express.Multer.File[];
       roomType: string;
       amenities: string[];
-      price: string;
-      max_adults: string;
-      max_children: string;
+      price: number;
+      max_adults: number;
+      max_children: number;
     },
     @Ctx() context: RmqContext,
   ) {
@@ -92,5 +92,18 @@ export class RoomController {
   ) {
     this.sharedService.acknowledgeMessage(context);
     return this.roomService.SearchRoomForBooking(payload);
+  }
+  @MessagePattern({ cmd: 'delete-room' })
+  async deleteRoom(
+    @Ctx() context: RmqContext,
+    @Payload() payload: { id: string },
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+    return this.roomService.deleteRoom(payload.id);
+  }
+  @MessagePattern({ cmd: 'get-amenities' })
+  async getAmenities(@Ctx() context) {
+    this.sharedService.acknowledgeMessage(context);
+    return this.roomService.getAmenities();
   }
 }
