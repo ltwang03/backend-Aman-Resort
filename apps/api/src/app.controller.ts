@@ -188,7 +188,7 @@ export class AppController {
       totalPrice,
       rooms,
     } = bookingDto;
-    const access_token = req?.headers?.authorization.split(' ')[1];
+    const access_token = req?.headers?.authorization?.split(' ')[1];
     return this.bookingService.send(
       { cmd: 'booking' },
       {
