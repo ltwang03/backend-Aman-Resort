@@ -222,4 +222,16 @@ export class AppController {
   async getAllAmenities() {
     return this.roomService.send({ cmd: 'get-amenities' }, {});
   }
+  @Roles(Role.ADMIN)
+  @UseGuards(AuthGuard)
+  @Delete('roomType/:id')
+  async deleteRoomType(@Param('id') id: string) {
+    return this.roomService.send({ cmd: 'delete-room-type' }, { id });
+  }
+  @Roles(Role.ADMIN)
+  @UseGuards(AuthGuard)
+  @Delete('amenity/:id')
+  async deleteAmenity(@Param('id') id: string) {
+    return this.roomService.send({ cmd: 'delete-amenity' }, { id });
+  }
 }

@@ -8,6 +8,7 @@ import { Booking } from '@app/shared/schemas/booking.schema';
 import mongoose, { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Amenity } from '@app/shared/schemas/amenity.schema';
+import { urlToHttpOptions } from 'url';
 const moment = require('moment');
 
 @Injectable()
@@ -280,14 +281,14 @@ export class RoomService {
       return { message: 'ID not exist!', code: HttpStatus.NOT_FOUND };
     }
     try {
-      // await this.RoomTypeRepository.update(room.roomType._id, {
-      //   $pull: { rooms: id },
-      // });
-      // for (const amenity of room.amenities) {
-      //   await this.AmenityRepository.update(amenity._id, {
-      //     $pull: { rooms: id },
-      //   });
-      // }
+      await this.RoomTypeRepository.update(room.roomType._id, {
+        $pull: { rooms: id },
+      });
+      for (const amenity of room.amenities) {
+        await this.AmenityRepository.update(amenity._id, {
+          $pull: { rooms: id },
+        });
+      }
       await this.RoomRepository.softDelete(id);
       return {
         message: 'Deleted',
@@ -303,6 +304,34 @@ export class RoomService {
       return amenities;
     } catch (e) {
       return e;
+    }
+  }
+  async deleteRoomType(id) {
+    if (typeof id !== 'string') {
+      return { message: 'type id not found', code: 400 };
+    }
+    try {
+      const query = await this.RoomTypeRepository.softDelete(id);
+      return { message: 'Deleted', code: 200 };
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  async deleteAmenity(id) {
+    if (typeof id !== 'string') {
+      return { message: 'type id not found', code: 400 };
+    }
+    try {
+      const amenity = await this.AmenityRepository.findOneById(id);
+      for (const room of amenity.rooms) {
+        await this.RoomRepository.update(room._id, {
+          $pull: { amenities: id },
+        });
+      }
+      await this.AmenityRepository.softDelete(id);
+      return { message: 'Deleted', code: 200 };
+    } catch (error) {
+      console.log(error);
     }
   }
 }

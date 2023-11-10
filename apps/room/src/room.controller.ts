@@ -1,4 +1,4 @@
-import { Controller, Inject } from '@nestjs/common';
+import { Controller, Inject, Param } from '@nestjs/common';
 import { RoomService } from './room.service';
 import { SharedService } from '@app/shared';
 import {
@@ -105,5 +105,21 @@ export class RoomController {
   async getAmenities(@Ctx() context) {
     this.sharedService.acknowledgeMessage(context);
     return this.roomService.getAmenities();
+  }
+  @MessagePattern({ cmd: 'delete-room-type' })
+  async deleteRoomType(
+    @Ctx() context: RmqContext,
+    @Payload() payload: { id: string },
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+    return this.roomService.deleteRoomType(payload.id);
+  }
+  @MessagePattern({ cmd: 'delete-amenity' })
+  async deleteAmenity(
+    @Ctx() context: RmqContext,
+    @Payload() payload: { id: string },
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+    return this.roomService.deleteAmenity(payload.id);
   }
 }
