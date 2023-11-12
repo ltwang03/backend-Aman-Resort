@@ -338,9 +338,12 @@ export class RoomService {
       return { message: 'Invalid name', code: 400 };
     }
     try {
-      const rooms = await this.RoomRepository.findAllWithPopulate({
-        $text: { $search: name },
-      });
+      const rooms = await this.RoomRepository.findAllWithPopulate(
+        {
+          $text: { $search: name },
+        },
+        'roomType',
+      );
 
       return { message: 'OK', code: 200, ...rooms };
     } catch (error) {
