@@ -234,4 +234,8 @@ export class AppController {
   async deleteAmenity(@Param('id') id: string) {
     return this.roomService.send({ cmd: 'delete-amenity' }, { id });
   }
+  @Post('rooms/search')
+  async seachRoom(@Query() query: { name: string }) {
+    return this.roomService.send({ cmd: 'search-room' }, { name: query.name });
+  }
 }

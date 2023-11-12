@@ -11,7 +11,7 @@ import { Amenity } from '@app/shared/schemas/amenity.schema';
   },
 })
 export class Room extends BaseEntity {
-  @Prop({ type: String, required: true })
+  @Prop({ type: String, required: true, index: true })
   name: string;
   @Prop({ type: String })
   slug: string;
@@ -37,4 +37,6 @@ export class Room extends BaseEntity {
   max_children: number;
 }
 export type RoomDocument = HydratedDocument<Room>;
-export const RoomSchema = SchemaFactory.createForClass(Room);
+const RoomSchema = SchemaFactory.createForClass(Room);
+RoomSchema.index({ name: 'text' });
+export { RoomSchema };

@@ -5,10 +5,9 @@ import { AmenityRepositoryInterface } from '@app/shared/interfaces/amenity.repos
 import { StorageService } from '@app/shared';
 import { BookingRepositoryInterface } from '@app/shared/interfaces/booking.repository.interface';
 import { Booking } from '@app/shared/schemas/booking.schema';
-import mongoose, { Model } from 'mongoose';
+import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Amenity } from '@app/shared/schemas/amenity.schema';
-import { urlToHttpOptions } from 'url';
 const moment = require('moment');
 
 @Injectable()
@@ -332,6 +331,20 @@ export class RoomService {
       return { message: 'Deleted', code: 200 };
     } catch (error) {
       console.log(error);
+    }
+  }
+  async searchRoom(name) {
+    if (typeof name !== 'string' || name.length === 0) {
+      return { message: 'Invalid name', code: 400 };
+    }
+    try {
+      const rooms = await this.RoomRepository.findAllWithPopulate({
+        $text: { $search: name },
+      });
+
+      return { message: 'OK', code: 200, ...rooms };
+    } catch (error) {
+      return error;
     }
   }
 }

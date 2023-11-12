@@ -122,4 +122,12 @@ export class RoomController {
     this.sharedService.acknowledgeMessage(context);
     return this.roomService.deleteAmenity(payload.id);
   }
+  @MessagePattern({ cmd: 'search-room' })
+  async searchRoom(
+    @Ctx() context: RmqContext,
+    @Payload() payload: { name: string },
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+    return this.roomService.searchRoom(payload.name);
+  }
 }
