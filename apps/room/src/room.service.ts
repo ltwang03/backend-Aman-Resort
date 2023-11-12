@@ -350,4 +350,17 @@ export class RoomService {
       return error;
     }
   }
+  async editAmenity(payload) {
+    const { name, id } = payload;
+    if (!name) {
+      return { message: 'Invalid Input', code: 400 };
+    }
+    const amenity = await this.AmenityRepository.findOneById(id);
+    if (!amenity) {
+      return { message: 'Amenity Not Found', code: 400 };
+    } else {
+      await this.AmenityRepository.update(id, { name });
+      return { message: 'Edited', code: HttpStatus.OK };
+    }
+  }
 }

@@ -11,6 +11,7 @@ import {
   UseGuards,
   UseInterceptors,
   Delete,
+  Patch,
 } from '@nestjs/common';
 import { AppService } from './app.service';
 
@@ -237,5 +238,17 @@ export class AppController {
   @Post('rooms/search')
   async seachRoom(@Query() query: { name: string }) {
     return this.roomService.send({ cmd: 'search-room' }, { name: query.name });
+  }
+  @Roles(Role.ADMIN)
+  @UseGuards(AuthGuard)
+  @Patch('amenity/:id')
+  async editAmenity(@Body() body: { name: string }, @Param('id') id: string) {
+    return this.roomService.send(
+      { cmd: 'edit-amenity' },
+      {
+        id,
+        name: body.name,
+      },
+    );
   }
 }
