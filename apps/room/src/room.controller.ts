@@ -151,4 +151,14 @@ export class RoomController {
     this.sharedService.acknowledgeMessage(context);
     return this.roomService.EditRoomTypeById(payload);
   }
+  @MessagePattern({ cmd: 'get-room-by-id' })
+  async getRoomById(@Ctx() context: RmqContext, @Payload() payload) {
+    this.sharedService.acknowledgeMessage(context);
+    return this.roomService.getRoomById(payload.id);
+  }
+  @MessagePattern({ cmd: 'edit-room-by-id' })
+  async editRoomById(@Ctx() context: RmqContext, @Payload() payload) {
+    this.sharedService.acknowledgeMessage(context);
+    return this.roomService.editRoomById(payload);
+  }
 }

@@ -273,7 +273,16 @@ export class AppController {
   async getRoomTypeById(@Param('id') id: string) {
     return this.roomService.send({ cmd: 'get-room-type-by-id' }, { id });
   }
-  // @Roles(Role.ADMIN)
-  // @UseGuards(AuthGuard)
-  // @Get
+  @Roles(Role.ADMIN)
+  @UseGuards(AuthGuard)
+  @Get('room/:id')
+  async getRoomById(@Param('id') id: string) {
+    return this.roomService.send({ cmd: 'get-room-by-id' }, { id });
+  }
+  @Roles(Role.ADMIN)
+  @UseGuards(AuthGuard)
+  @Patch('room/:id')
+  async EditRoomById(@Param('id') id: string, @Body() body: NewRoomDto) {
+    return this.roomService.send({ cmd: 'edit-room-by-id' }, { ...body, id });
+  }
 }

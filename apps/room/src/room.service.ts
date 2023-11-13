@@ -40,6 +40,12 @@ export class RoomService {
       return e;
     }
   }
+  slugify(text) {
+    text = text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    text = text.replace(/[^\w\s-]/g, '');
+    text = text.replace(/\s+/g, '-');
+    return text.toLowerCase();
+  }
   async createRoomType(payload) {
     const { title, name, path, description, inclusion } = payload;
     try {
@@ -90,7 +96,8 @@ export class RoomService {
       text = text.replace(/\s+/g, '-');
       return text.toLowerCase();
     }
-    const slug = slugify(name);
+
+    const slug = this.slugify(name);
     try {
       const existingRoom = await this.RoomRepository.findOneByCondition({
         name,
@@ -248,7 +255,10 @@ export class RoomService {
     const unavailableRooms: any = await this.BookingModel.find({
       start: { $gte: formatStartToDate, $lte: formatEndToDate },
     }).lean();
-    const listRoomReject = unavailableRooms[0]?.rooms;
+    const listRoomReject = [];
+    const mapRoom = unavailableRooms.map((value) =>
+      listRoomReject.push(value.rooms[0]),
+    );
     const roomForBooking = await this.RoomRepository.findAllWithPopulate(
       {
         _id: { $nin: listRoomReject },
@@ -397,6 +407,68 @@ export class RoomService {
         description,
         path,
         inclusion,
+      });
+      return { message: 'Edited', code: 200 };
+    } catch (error) {
+      return error;
+    }
+  }
+  async getRoomById(id) {
+    if (!id) {
+      return { message: 'Invalid Input', code: 400 };
+    }
+    try {
+      const room = await this.RoomRepository.findOneById(id);
+      return {
+        message: 'OK',
+        code: 200,
+        room,
+      };
+    } catch (error) {
+      return error;
+    }
+  }
+  async editRoomById(payload) {
+    const {
+      id,
+      name,
+      description,
+      size,
+      roomType,
+      amenities,
+      price,
+      max_adults,
+      max_children,
+    } = payload;
+    const checkRoomTypeExist = await this.RoomTypeRepository.findOneById(
+      roomType,
+    );
+    if (!checkRoomTypeExist) {
+      return { message: 'RoomType not found', code: 400 };
+    }
+    const checkRoomExist = await this.RoomRepository.findOneById(id);
+    if (!checkRoomExist) {
+      return { message: 'Room not found', code: 400 };
+    }
+    try {
+      const pullRoom = await this.RoomTypeRepository.update(
+        checkRoomExist.roomType._id,
+        {
+          $pull: { rooms: checkRoomExist._id },
+        },
+      );
+      const pushNewRoom = await this.RoomTypeRepository.updateList(roomType, {
+        rooms: id,
+      });
+      const updateRoom = await this.RoomRepository.update(id, {
+        name,
+        description,
+        slug: this.slugify(name),
+        size,
+        roomType,
+        amenities,
+        max_adults,
+        max_children,
       });
       return { message: 'Edited', code: 200 };
     } catch (error) {

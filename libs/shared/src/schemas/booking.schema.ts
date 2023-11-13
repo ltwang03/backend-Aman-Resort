@@ -2,7 +2,14 @@ import { BaseEntity } from '@app/shared/repositories/bases/base.entity';
 import mongoose, { HydratedDocument } from 'mongoose';
 import { Room } from '@app/shared/schemas/room.schema';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-
+enum PaymentStatus {
+  paid = 'Đã thanh toán',
+  unPaid = 'Chưa Thanh toán',
+}
+enum Status {
+  confirmed = 'Đã xác nhận',
+  unConfirmed = 'Chưa xác nhận',
+}
 @Schema({
   timestamps: {
     createdAt: 'created_at',
@@ -46,6 +53,10 @@ export class Booking extends BaseEntity {
   totalPrice: number;
   @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Room' }] })
   rooms: Room[];
+  @Prop({ type: String, required: true, default: PaymentStatus.unPaid })
+  payment_status: string;
+  @Prop({ type: String, required: true, default: Status.unConfirmed })
+  status: string;
 }
 export type BookingDocument = HydratedDocument<Room>;
 export const BookingSchema = SchemaFactory.createForClass(Booking);
