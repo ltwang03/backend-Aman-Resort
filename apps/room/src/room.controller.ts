@@ -138,4 +138,17 @@ export class RoomController {
     this.sharedService.acknowledgeMessage(context);
     return this.roomService.editAmenity(payload);
   }
+  @MessagePattern({ cmd: 'get-room-type-by-id' })
+  async getRoomTypeById(
+    @Ctx() context: RmqContext,
+    @Payload() payload: { id: string },
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+    return this.roomService.getRoomTypeById(payload.id);
+  }
+  @MessagePattern({ cmd: 'edit-room-type' })
+  async editRoomTypeById(@Ctx() context: RmqContext, @Payload() payload) {
+    this.sharedService.acknowledgeMessage(context);
+    return this.roomService.EditRoomTypeById(payload);
+  }
 }

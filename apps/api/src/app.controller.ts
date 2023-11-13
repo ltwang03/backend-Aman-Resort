@@ -251,4 +251,29 @@ export class AppController {
       },
     );
   }
+  @Roles(Role.ADMIN)
+  @UseGuards(AuthGuard)
+  @Patch('roomType/:id')
+  async editRoomType(
+    @Body()
+    body: {
+      title: string;
+      name: string;
+      description: string;
+      inclusion: string[];
+      path: string;
+    },
+    @Param('id') id: string,
+  ) {
+    return this.roomService.send({ cmd: 'edit-room-type' }, { ...body, id });
+  }
+  @Roles(Role.ADMIN)
+  @UseGuards(AuthGuard)
+  @Get('roomType/:id')
+  async getRoomTypeById(@Param('id') id: string) {
+    return this.roomService.send({ cmd: 'get-room-type-by-id' }, { id });
+  }
+  // @Roles(Role.ADMIN)
+  // @UseGuards(AuthGuard)
+  // @Get
 }

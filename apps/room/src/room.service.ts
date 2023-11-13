@@ -363,4 +363,44 @@ export class RoomService {
       return { message: 'Edited', code: HttpStatus.OK };
     }
   }
+  async getRoomTypeById(id: string) {
+    if (!id) {
+      return { message: 'Invalid Input', code: 400 };
+    }
+    const roomType = await this.RoomTypeRepository.findOneById(id);
+    if (!roomType) {
+      return { message: 'Room Type not found', code: 400 };
+    }
+    return { message: 'OK', code: 200, roomType };
+  }
+  async EditRoomTypeById(payload) {
+    const { title, name, description, path, inclusion, id } = payload;
+    if (
+      !title ||
+      !name ||
+      !description ||
+      !path ||
+      !id ||
+      !inclusion ||
+      inclusion?.length < 1
+    ) {
+      return { message: 'Invalid Input', code: 400 };
+    }
+    try {
+      const checkRoomTypeExist = await this.RoomTypeRepository.findOneById(id);
+      if (!checkRoomTypeExist) {
+        return { message: 'Room Type not found', code: 400 };
+      }
+      await this.RoomTypeRepository.update(id, {
+        title,
+        name,
+        description,
+        path,
+        inclusion,
+      });
+      return { message: 'Edited', code: 200 };
+    } catch (error) {
+      return error;
+    }
+  }
 }
