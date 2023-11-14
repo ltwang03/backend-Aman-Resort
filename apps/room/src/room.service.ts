@@ -290,7 +290,7 @@ export class RoomService {
       return { message: 'ID not exist!', code: HttpStatus.NOT_FOUND };
     }
     try {
-      await this.RoomTypeRepository.update(room.roomType._id, {
+      await this.RoomTypeRepository.update(room.roomType?._id, {
         $pull: { rooms: id },
       });
       for (const amenity of room.amenities) {
@@ -344,14 +344,23 @@ export class RoomService {
     }
   }
   async searchRoom(name) {
-    if (typeof name !== 'string' || name.length === 0) {
+    if (typeof name !== 'string') {
       return { message: 'Invalid name', code: 400 };
     }
+
     try {
+      let query = {};
+      if (name && name.length > 0) {
+        query = {
+          name: {
+            $regex: name,
+            $options: 'i', // Tùy chọn 'i' để tìm kiếm không phân biệt hoa thường
+          },
+        };
+      }
+
       const rooms = await this.RoomRepository.findAllWithPopulate(
-        {
-          $text: { $search: name },
-        },
+        query,
         'roomType',
       );
 
@@ -452,7 +461,7 @@ export class RoomService {
     }
     try {
       const pullRoom = await this.RoomTypeRepository.update(
-        checkRoomExist.roomType._id,
+        checkRoomExist.roomType?._id,
         {
           $pull: { rooms: checkRoomExist._id },
         },
@@ -474,5 +483,12 @@ export class RoomService {
     } catch (error) {
       return error;
     }
+  }
+  async getAmenityById(id) {
+    if (!id) {
+      return { message: 'Invalid Input', code: 400 };
+    }
+    const amenity = await this.AmenityRepository.findOneById(id);
+    return { message: 'OK', code: 200, amenity };
   }
 }

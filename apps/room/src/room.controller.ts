@@ -161,4 +161,9 @@ export class RoomController {
     this.sharedService.acknowledgeMessage(context);
     return this.roomService.editRoomById(payload);
   }
+  @MessagePattern({ cmd: 'get-amenity-by-id' })
+  async getAmenityById(@Ctx() context, @Payload() payload: { id: string }) {
+    this.sharedService.acknowledgeMessage(context);
+    return this.roomService.getAmenityById(payload.id);
+  }
 }

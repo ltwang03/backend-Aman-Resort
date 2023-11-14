@@ -285,4 +285,10 @@ export class AppController {
   async EditRoomById(@Param('id') id: string, @Body() body: NewRoomDto) {
     return this.roomService.send({ cmd: 'edit-room-by-id' }, { ...body, id });
   }
+  @Roles(Role.ADMIN)
+  @UseGuards(AuthGuard)
+  @Get('amenity/:id')
+  async getAmenityById(@Param('id') id: string) {
+    return this.roomService.send({ cmd: 'get-amenity-by-id' }, { id });
+  }
 }
