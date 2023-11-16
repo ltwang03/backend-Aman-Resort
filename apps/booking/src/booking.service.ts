@@ -66,15 +66,13 @@ export class BookingService {
   }
   async getBookings() {
     try {
-      const bookings = await this.BookingRepository.findAllWithPopulate(
-        {
-          status: Status.confirmed,
-        },
+      const booking = await this.BookingRepository.findAllWithPopulate(
+        {},
         'rooms',
       );
-      return bookings;
-    } catch (error) {
-      return error;
+      return booking;
+    } catch (e) {
+      return e;
     }
   }
   async getBookingsUnconfirm() {

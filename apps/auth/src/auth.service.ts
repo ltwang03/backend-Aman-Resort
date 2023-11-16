@@ -321,4 +321,38 @@ export class AuthService {
       return error;
     }
   }
+  async editMe(payload) {
+    const { access_token, currentPassword, password, ...others } = payload;
+    const decoded_token: any = await this.getUserFromHeader(access_token);
+    const userId = decoded_token?.user?._id;
+    const checkUserExists = await this.UserRepository.findOneById(userId);
+    const phoneValidate = await this.validatePhoneNumber(payload.phone);
+    if (phoneValidate === false) {
+      return { error: 'phone not found', code: 400 };
+    }
+    if (!checkUserExists) {
+      return { error: 'User not found', code: 400 };
+    }
+    if (currentPassword && password) {
+      const user = await this.validateUser(
+        checkUserExists.email,
+        currentPassword,
+      );
+      if (!user) {
+        return { error: 'Invalid Current Password', code: 400 };
+      }
+      const hashPassword = await this.hashPassword(password);
+      await this.UserRepository.update(checkUserExists._id, {
+        password: hashPassword,
+      });
+    }
+    try {
+      const updateUser = await this.UserRepository.update(checkUserExists._id, {
+        ...others,
+      });
+      return { message: 'Edited', code: HttpStatus.OK };
+    } catch (error) {
+      return error;
+    }
+  }
 }

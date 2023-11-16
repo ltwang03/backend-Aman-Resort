@@ -96,4 +96,9 @@ export class AuthController {
     this.sharedService.acknowledgeMessage(context);
     return this.authService.EditUserById(payload);
   }
+  @MessagePattern({ cmd: 'edit-me' })
+  async edit_me(@Ctx() context: RmqContext, @Payload() payload) {
+    this.sharedService.acknowledgeMessage(context);
+    return this.authService.editMe(payload);
+  }
 }

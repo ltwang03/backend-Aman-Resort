@@ -30,6 +30,7 @@ import { NewRoomDto } from './dtos/new-room.dto';
 import { BookingDto } from './dtos/booking.dto';
 import { AddUserFromAdminDto } from './dtos/add-user-from-admin.dto';
 import { EditUserDto } from './dtos/edt-user.dto';
+import { EditMeDto } from './dtos/edit-me.dto';
 
 @Controller()
 export class AppController {
@@ -317,8 +318,6 @@ export class AppController {
   async EditUserById(@Param('id') id: string, @Body() body: EditUserDto) {
     return this.authService.send({ cmd: 'edit-user-by-id' }, { id, ...body });
   }
-  @Roles(Role.ADMIN)
-  @UseGuards(AuthGuard)
   @Get('bookings')
   async getBookings() {
     return this.bookingService.send({ cmd: 'get-all-booking' }, {});
@@ -340,5 +339,10 @@ export class AppController {
   @Patch('bookings/:id')
   async confirmBookingById(@Param('id') id: string) {
     return this.bookingService.send({ cmd: 'confirm-booking-by-id' }, { id });
+  }
+  @Patch('auth/me')
+  async EditMe(@Body() body: EditMeDto, @Req() request: Request) {
+    const access_token = request?.headers?.authorization?.split(' ')[1];
+    return this.authService.send({ cmd: 'edit-me' }, { ...body, access_token });
   }
 }
