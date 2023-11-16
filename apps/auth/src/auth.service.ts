@@ -10,12 +10,15 @@ import { NewUserDto } from './dtos/new-user.dto';
 import * as bcrypt from 'bcrypt';
 import { ExistingUserDto } from './dtos/existing-user.dto';
 import { JwtService } from '@nestjs/jwt';
+import { BookingRepositoryInterface } from '@app/shared/interfaces/booking.repository.interface';
 
 @Injectable()
 export class AuthService {
   constructor(
     @Inject('UserRepositoryInterface')
     private readonly UserRepository: UserRepositoryInterface,
+    @Inject('BookingRepositoryInterface')
+    private readonly BookingRepository: BookingRepositoryInterface,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -218,9 +221,12 @@ export class AuthService {
       throw new UnauthorizedException();
     }
     const payload = await this.getUserFromHeader(token);
-    const user: any = await this.UserRepository.findOneByCondition({
-      _id: payload['user']['_id'],
-    });
+    const user: any = await this.UserRepository.findOneByCondition(
+      {
+        _id: payload['user']['_id'],
+      },
+      'booked',
+    );
     const { delete_at, r_token, password, created_at, updated_at, ...others } =
       user._doc;
     if (!user) {

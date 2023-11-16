@@ -3,7 +3,7 @@ import { FilterQuery, QueryOptions } from 'mongoose';
 
 export interface BaseInterfaceRepository<T> {
   create(dto: T | any): Promise<T>;
-  findOneById(id: string, projection?: string): Promise<T>;
+  findOneById(id: string, populate?: string, projection?: string): Promise<T>;
 
   findOneByCondition(
     condition?: object,

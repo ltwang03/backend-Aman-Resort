@@ -11,6 +11,8 @@ import { JwtGuard } from './jwt.guard';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { R_jwtGuard } from './r_jwt.guard';
 import { R_jwtStrategy } from './strategies/r_jwt.strategy';
+import { BookingRepository } from '@app/shared/repositories/booking.repository';
+import { Booking, BookingSchema } from '@app/shared/schemas/booking.schema';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -25,7 +27,10 @@ import { R_jwtStrategy } from './strategies/r_jwt.strategy';
     }),
     SharedModule,
     MongodbModule,
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    MongooseModule.forFeature([
+      { name: User.name, schema: UserSchema },
+      { name: Booking.name, schema: BookingSchema },
+    ]),
   ],
   controllers: [AuthController],
   providers: [
@@ -37,6 +42,7 @@ import { R_jwtStrategy } from './strategies/r_jwt.strategy';
     R_jwtStrategy,
     { provide: 'SharedServiceInterface', useClass: SharedService },
     { provide: 'UserRepositoryInterface', useClass: UserRepository },
+    { provide: 'BookingRepositoryInterface', useClass: BookingRepository },
   ],
 })
 export class AuthModule {}

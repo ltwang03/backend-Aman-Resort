@@ -15,8 +15,8 @@ export abstract class BaseRepositoryAbstract<T extends BaseEntity>
     return await this.model.create(dto);
   }
 
-  async findOneById(id: string): Promise<T> {
-    const item: any = await this.model.findById(id);
+  async findOneById(id: string, populated?: string): Promise<T> {
+    const item: any = await this.model.findById(id)?.populate(populated).exec();
     return item.delete_at ? null : item;
   }
 

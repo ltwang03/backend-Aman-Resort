@@ -11,8 +11,8 @@ export class BookingRepository
 {
   constructor(
     @InjectModel(Booking.name)
-    private readonly bookingRepository: Model<Booking>,
+    private readonly BookingRepository: Model<Booking>,
   ) {
-    super(bookingRepository);
+    super(BookingRepository);
   }
 }
