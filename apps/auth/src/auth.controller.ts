@@ -73,4 +73,27 @@ export class AuthController {
     this.sharedService.acknowledgeMessage(context);
     return this.authService.getUserFromHeader(payload.jwt);
   }
+  @MessagePattern({ cmd: 'delete-user-by-id' })
+  async deleteUserById(
+    @Ctx() context: RmqContext,
+    @Payload() payload: { id: string },
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+    return this.authService.deleteUserById(payload.id);
+  }
+  @MessagePattern({ cmd: 'add-user-by-admin' })
+  async addUser(@Ctx() context: RmqContext, @Payload() payload) {
+    this.sharedService.acknowledgeMessage(context);
+    return this.authService.addUserFromAdmin(payload);
+  }
+  @MessagePattern({ cmd: 'get-user-by-id' })
+  async getUserById(@Ctx() context: RmqContext, @Payload() payload) {
+    this.sharedService.acknowledgeMessage(context);
+    return this.authService.getUserById(payload.id);
+  }
+  @MessagePattern({ cmd: 'edit-user-by-id' })
+  async editUserById(@Ctx() context: RmqContext, @Payload() payload) {
+    this.sharedService.acknowledgeMessage(context);
+    return this.authService.EditUserById(payload);
+  }
 }

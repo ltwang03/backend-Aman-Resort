@@ -30,10 +30,16 @@ export class AuthService {
       );
     }
   }
-
+  validatePhoneNumber(phoneNumber) {
+    const regex = /^(0|\+[0-9]+)?[0-9]*$/;
+    return regex.test(phoneNumber);
+  }
   async register(newUser: Readonly<NewUserDto>) {
     try {
       const { firstname, lastname, phone, country, email, password } = newUser;
+      if (this.validatePhoneNumber(phone) == false) {
+        return { message: 'phone is not valid', code: 400 };
+      }
       const existingUser = await this.UserRepository.findOneByCondition({
         email,
       });
@@ -200,9 +206,7 @@ export class AuthService {
     }
   }
   async getAllUser() {
-    const data = await this.UserRepository.findAllWithPopulate({
-      role: 'User',
-    });
+    const data = await this.UserRepository.findAllWithPopulate({});
     return {
       status: HttpStatus.OK,
       message: 'OK',
@@ -223,5 +227,92 @@ export class AuthService {
       throw new UnauthorizedException();
     }
     return others;
+  }
+  async deleteUserById(id) {
+    if (!id) {
+      return { message: 'Invalid Input', code: 400 };
+    }
+    const user = await this.UserRepository.findOneById(id);
+    if (!user) {
+      return { message: 'User not found', code: 400 };
+    }
+    try {
+      await this.UserRepository.softDelete(id);
+      return { message: 'Deleted', code: 200 };
+    } catch (error) {
+      return error;
+    }
+  }
+  async addUserFromAdmin(payload) {
+    const { firstname, lastname, phone, country, email, password, role } =
+      payload;
+    if (this.validatePhoneNumber(phone) == false) {
+      return { message: 'Phone is not valid', code: 400 };
+    }
+    try {
+      const checkEmailExist = await this.UserRepository.findOneByCondition({
+        email,
+      });
+      if (checkEmailExist) {
+        return {
+          message: 'An account with that email already exists! ',
+          code: 400,
+        };
+      }
+      const checkExistPhone = await this.UserRepository.findOneByCondition({
+        phone,
+      });
+      if (checkExistPhone) {
+        return { message: 'Phone is already exists!', code: 400 };
+      }
+      const hashPassword = await this.hashPassword(password);
+      const saveUser = await this.UserRepository.create({
+        firstname,
+        lastname,
+        phone,
+        country,
+        email,
+        password: hashPassword,
+        role,
+      });
+      return {
+        message: 'Create User Successfully',
+        code: 200,
+      };
+    } catch (error) {
+      return error;
+    }
+  }
+  async getUserById(id) {
+    if (!id) {
+      return { message: 'Invalid Input', code: 400 };
+    }
+    const user = await this.UserRepository.findOneById(id);
+    if (!user) {
+      return { message: 'User not found', code: 400 };
+    } else {
+      return { message: 'OK', code: 200, user };
+    }
+  }
+  async EditUserById(payload) {
+    const { id, ...others } = payload;
+    if (this.validatePhoneNumber(payload.phone) == false) {
+      return { message: 'phone is not valid', code: 400 };
+    }
+    if (!id) {
+      return { message: 'Invalid Input', code: 400 };
+    }
+    const checkIdUser = await this.UserRepository.findOneById(id);
+    if (!checkIdUser) {
+      return { message: 'Id not found', code: 400 };
+    }
+    try {
+      const updateUser = await this.UserRepository.update(id, {
+        ...others,
+      });
+      return { message: 'Edited', code: 200 };
+    } catch (error) {
+      return error;
+    }
   }
 }

@@ -28,6 +28,8 @@ import { NewRoomTypeDto } from './dtos/new-RoomType.dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { NewRoomDto } from './dtos/new-room.dto';
 import { BookingDto } from './dtos/booking.dto';
+import { AddUserFromAdminDto } from './dtos/add-user-from-admin.dto';
+import { EditUserDto } from './dtos/edt-user.dto';
 
 @Controller()
 export class AppController {
@@ -290,5 +292,53 @@ export class AppController {
   @Get('amenity/:id')
   async getAmenityById(@Param('id') id: string) {
     return this.roomService.send({ cmd: 'get-amenity-by-id' }, { id });
+  }
+  @Roles(Role.ADMIN)
+  @UseGuards(AuthGuard)
+  @Delete('user/:id')
+  async deleteUserById(@Param('id') id: string) {
+    return this.authService.send({ cmd: 'delete-user-by-id' }, { id });
+  }
+  @Roles(Role.ADMIN)
+  @UseGuards(AuthGuard)
+  @Post('users')
+  async addUser(@Body() body: AddUserFromAdminDto) {
+    return this.authService.send({ cmd: 'add-user-by-admin' }, body);
+  }
+  @Roles(Role.ADMIN)
+  @UseGuards(AuthGuard)
+  @Get('user/:id')
+  async getUserById(@Param('id') id: string) {
+    return this.authService.send({ cmd: 'get-user-by-id' }, { id });
+  }
+  @Roles(Role.ADMIN)
+  @UseGuards(AuthGuard)
+  @Patch('user/:id')
+  async EditUserById(@Param('id') id: string, @Body() body: EditUserDto) {
+    return this.authService.send({ cmd: 'edit-user-by-id' }, { id, ...body });
+  }
+  @Roles(Role.ADMIN)
+  @UseGuards(AuthGuard)
+  @Get('bookings')
+  async getBookings() {
+    return this.bookingService.send({ cmd: 'get-all-booking' }, {});
+  }
+  @Roles(Role.ADMIN)
+  @UseGuards(AuthGuard)
+  @Get('bookings/unconfirm')
+  async getBookingsUnConfirm() {
+    return this.bookingService.send({ cmd: 'get-all-booking-unconfirm' }, {});
+  }
+  @Roles(Role.ADMIN)
+  @UseGuards(AuthGuard)
+  @Delete('bookings/:id')
+  async DeleteBookingById(@Param('id') id: string) {
+    return this.bookingService.send({ cmd: 'delete-booking-by-id' }, { id });
+  }
+  @Roles(Role.ADMIN)
+  @UseGuards(AuthGuard)
+  @Patch('bookings/:id')
+  async confirmBookingById(@Param('id') id: string) {
+    return this.bookingService.send({ cmd: 'confirm-booking-by-id' }, { id });
   }
 }

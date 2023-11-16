@@ -1,4 +1,4 @@
-import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable, HttpException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { RoomRepositoryInterface } from '@app/shared/interfaces/room.repository.interface';
 import { BookingRepositoryInterface } from '@app/shared/interfaces/booking.repository.interface';
@@ -6,6 +6,11 @@ import { UserRepositoryInterface } from '@app/shared/interfaces/user.repository.
 import * as jwt from 'jsonwebtoken';
 import * as moment from 'moment';
 
+enum Status {
+  confirmed = 'Đã xác nhận',
+  unConfirmed = 'Chưa xác nhận',
+  cancel = 'Đã hủy',
+}
 @Injectable()
 export class BookingService {
   constructor(
@@ -57,6 +62,43 @@ export class BookingService {
       return { status: 'Đặt phòng thành công', code: 200 };
     } catch (e) {
       return e;
+    }
+  }
+  async getBookings() {
+    try {
+      const bookings = await this.BookingRepository.findAllWithPopulate(
+        {
+          status: Status.confirmed,
+        },
+        'rooms',
+      );
+      return bookings;
+    } catch (error) {
+      return error;
+    }
+  }
+  async getBookingsUnconfirm() {
+    try {
+      const bookings = await this.BookingRepository.findAllWithPopulate(
+        {
+          status: Status.unConfirmed,
+        },
+        'rooms',
+      );
+      return bookings;
+    } catch (error) {
+      return error;
+    }
+  }
+  async deleteBookingById(id) {
+    if (!id) {
+      throw new HttpException('Invalid Input', HttpStatus.BAD_REQUEST);
+    }
+    try {
+      const deleteBooking = await this.BookingRepository.softDelete(id);
+      return { message: 'Deleted', code: 200 };
+    } catch (error) {
+      return error;
     }
   }
 }

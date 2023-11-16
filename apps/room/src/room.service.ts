@@ -8,7 +8,7 @@ import { Booking } from '@app/shared/schemas/booking.schema';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Amenity } from '@app/shared/schemas/amenity.schema';
-const moment = require('moment');
+import * as moment from 'moment';
 
 @Injectable()
 export class RoomService {

@@ -9,6 +9,7 @@ enum PaymentStatus {
 enum Status {
   confirmed = 'Đã xác nhận',
   unConfirmed = 'Chưa xác nhận',
+  cancel = 'Đã hủy',
 }
 @Schema({
   timestamps: {

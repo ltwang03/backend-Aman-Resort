@@ -16,12 +16,9 @@ export class NewRoomDto {
   @IsArray()
   amenities: string[];
   @IsNotEmpty()
-  @IsString()
   price: string;
   @IsNotEmpty()
-  @IsString()
   max_adults: string;
   @IsNotEmpty()
-  @IsString()
   max_children: string;
 }

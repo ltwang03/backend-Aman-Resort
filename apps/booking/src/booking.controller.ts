@@ -20,4 +20,22 @@ export class BookingController {
     this.sharedService.acknowledgeMessage(context);
     return this.bookingService.booking(payload);
   }
+  @MessagePattern({ cmd: 'get-all-booking' })
+  async getBookings(@Ctx() context: RmqContext) {
+    this.sharedService.acknowledgeMessage(context);
+    return this.bookingService.getBookings();
+  }
+  @MessagePattern({ cmd: 'get-all-booking-unconfirm' })
+  async getBookingsUnConfirm(@Ctx() context: RmqContext) {
+    this.sharedService.acknowledgeMessage(context);
+    return this.bookingService.getBookingsUnconfirm();
+  }
+  @MessagePattern({ cmd: 'delete-booking-by-id' })
+  async deleteBookingById(
+    @Ctx() context: RmqContext,
+    @Payload() payload: { id: string },
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+    return this.bookingService.deleteBookingById(payload.id);
+  }
 }
