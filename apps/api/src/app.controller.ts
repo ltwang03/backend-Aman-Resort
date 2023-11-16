@@ -12,6 +12,7 @@ import {
   UseInterceptors,
   Delete,
   Patch,
+  Put,
 } from '@nestjs/common';
 import { AppService } from './app.service';
 
@@ -344,5 +345,11 @@ export class AppController {
   async EditMe(@Body() body: EditMeDto, @Req() request: Request) {
     const access_token = request?.headers?.authorization?.split(' ')[1];
     return this.authService.send({ cmd: 'edit-me' }, { ...body, access_token });
+  }
+  @Roles(Role.ADMIN)
+  @UseGuards(AuthGuard)
+  @Put('bookings/:id')
+  async CancelBooking(@Param('id') id: string) {
+    return this.bookingService.send({ cmd: 'cancel-booking-by-id' }, { id });
   }
 }

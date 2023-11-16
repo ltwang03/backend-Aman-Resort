@@ -99,4 +99,31 @@ export class BookingService {
       return error;
     }
   }
+  async confirmBookingById(id) {
+    if (!id) {
+      return { error: 'Invalid Input', code: 400 };
+    }
+    const checkIdUser = await this.UserRepository.findOneById(id);
+    if (!checkIdUser) {
+      return { error: 'User not found', code: 400 };
+    }
+    try {
+      return { message: 'Confirmed', code: 200 };
+    } catch (error) {
+      return error;
+    }
+  }
+  async cancelBookingById(id) {
+    if (!id) {
+      return { error: 'Invalid Input', code: 400 };
+    }
+    try {
+      const cancelBooking = await this.BookingRepository.update(id, {
+        status: 'Hủy',
+      });
+      return { message: 'Canceled', code: 200 };
+    } catch (error) {
+      return error;
+    }
+  }
 }
