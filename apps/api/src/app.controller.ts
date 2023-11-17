@@ -32,6 +32,7 @@ import { BookingDto } from './dtos/booking.dto';
 import { AddUserFromAdminDto } from './dtos/add-user-from-admin.dto';
 import { EditUserDto } from './dtos/edt-user.dto';
 import { EditMeDto } from './dtos/edit-me.dto';
+import { EditBookingDto } from './dtos/edit-booking.dto';
 
 @Controller()
 export class AppController {
@@ -351,5 +352,20 @@ export class AppController {
   @Put('bookings/:id')
   async CancelBooking(@Param('id') id: string) {
     return this.bookingService.send({ cmd: 'cancel-booking-by-id' }, { id });
+  }
+  @Roles(Role.ADMIN)
+  @UseGuards(AuthGuard)
+  @Get('bookings/:id')
+  async getBookingsById(@Param('id') id: string) {
+    return this.bookingService.send({ cmd: 'get-booking-by-id' }, { id });
+  }
+  @Roles(Role.ADMIN)
+  @UseGuards(AuthGuard)
+  @Patch('bookings/edit/:id')
+  async editBookingById(@Param('id') id: string, @Body() body: EditBookingDto) {
+    return this.bookingService.send(
+      { cmd: 'edit-booking-by-id' },
+      { ...body, id },
+    );
   }
 }

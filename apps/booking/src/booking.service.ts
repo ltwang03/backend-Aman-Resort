@@ -125,4 +125,27 @@ export class BookingService {
       return error;
     }
   }
+  async getBookingById(id) {
+    if (!id) {
+      return { error: 'Invalid Input', code: 400 };
+    }
+    try {
+      const booking = await this.BookingRepository.findOneById(id);
+      return { message: 'OK', code: 200, booking };
+    } catch (error) {
+      return error;
+    }
+  }
+  async editBookingById(payload) {
+    const { id, ...others } = payload;
+    if (!id) {
+      return { error: 'Invalid Input', code: 400 };
+    }
+    try {
+      const update = await this.BookingRepository.update(id, { ...others });
+      return { message: 'Edited', code: 200 };
+    } catch (error) {
+      return error;
+    }
+  }
 }

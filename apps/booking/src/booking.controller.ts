@@ -54,4 +54,17 @@ export class BookingController {
     this.sharedService.acknowledgeMessage(context);
     return this.bookingService.cancelBookingById(payload.id);
   }
+  @MessagePattern({ cmd: 'get-booking-by-id' })
+  async getBookingsById(
+    @Ctx() context: RmqContext,
+    @Payload() payload: { id: string },
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+    return this.bookingService.getBookingById(payload.id);
+  }
+  @MessagePattern({ cmd: 'edit-booking-by-id' })
+  async editBookingsById(@Ctx() context: RmqContext, @Payload() payload) {
+    this.sharedService.acknowledgeMessage(context);
+    return this.bookingService.editBookingById(payload);
+  }
 }

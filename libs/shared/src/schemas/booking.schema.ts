@@ -4,7 +4,7 @@ import { Room } from '@app/shared/schemas/room.schema';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 enum PaymentStatus {
   paid = 'Đã thanh toán',
-  unPaid = 'Chưa Thanh toán',
+  unPaid = 'Chưa thanh toán',
 }
 enum Status {
   confirmed = 'Đã xác nhận',
