@@ -103,11 +103,10 @@ export class BookingService {
     if (!id) {
       return { error: 'Invalid Input', code: 400 };
     }
-    const checkIdUser = await this.UserRepository.findOneById(id);
-    if (!checkIdUser) {
-      return { error: 'User not found', code: 400 };
-    }
     try {
+      const confirmBooking = await this.BookingRepository.update(id, {
+        status: 'Đã xác nhận',
+      });
       return { message: 'Confirmed', code: 200 };
     } catch (error) {
       return error;
