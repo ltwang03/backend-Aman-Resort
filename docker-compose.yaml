@@ -11,20 +11,58 @@ services:
       - .env
     volumes:
       - ./persistence/rabbitmq:/var/lib/rabbitmq
-
-#  database_mongo:
-#    image: mongo:6-jammy
-#    container_name: database_mongo
-#    hostname: mongodb
-#    ports:
-#      - '27017:27017'
-#    env_file:
-#      - .env
-#    volumes:
-#      - ./persistence/mongo-entrypoint:/docker-entrypoint-initdb.d
-#      - ./persistence/mongodb:/data/db
-#      - ./persistence/mongoconfig:/data/configdb
+  auth:
+    build:
+      context: ./
+      dockerfile: ./apps/auth/Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      - rabbitmq
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    command: npm run start:dev auth
+  room:
+    build:
+      context: ./
+      dockerfile: ./apps/room/Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      - rabbitmq
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    command: npm run start:dev room
+  booking:
+    build:
+      context: ./
+      dockerfile: ./apps/booking/Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      - rabbitmq
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    command: npm run start:dev booking
+  api:
+    build:
+      context: ./
+      dockerfile: ./apps/api/Dockerfile
+    ports:
+      - '3000:3000'
+    env_file:
+      - .env
+    depends_on:
+      - rabbitmq
+      - auth
+      - booking
+      - room
+    volumes:
+      - .:/usr/src/app # any change to base folder should be reflected
+      - /usr/src/app/node_modules
+    command: npm run start:dev api
 volumes:
-#  mongodb:
-#  mongoconfig:
   rabbitmq:
