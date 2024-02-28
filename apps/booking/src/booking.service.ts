@@ -1,4 +1,10 @@
-import { HttpStatus, Inject, Injectable, HttpException } from '@nestjs/common';
+import {
+  HttpStatus,
+  Inject,
+  Injectable,
+  HttpException,
+  Scope,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { RoomRepositoryInterface } from '@app/shared/interfaces/room.repository.interface';
 import { BookingRepositoryInterface } from '@app/shared/interfaces/booking.repository.interface';
@@ -11,7 +17,7 @@ enum Status {
   unConfirmed = 'Chưa xác nhận',
   cancel = 'Đã hủy',
 }
-@Injectable()
+@Injectable({ scope: Scope.DEFAULT })
 export class BookingService {
   constructor(
     configService: ConfigService,

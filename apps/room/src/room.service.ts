@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  Scope,
+} from '@nestjs/common';
 import { RoomRepositoryInterface } from '@app/shared/interfaces/room.repository.interface';
 import { RoomTypeRepositoryInterface } from '@app/shared/interfaces/roomType.repository.interface';
 import { AmenityRepositoryInterface } from '@app/shared/interfaces/amenity.repository.interface';
@@ -10,7 +16,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Amenity } from '@app/shared/schemas/amenity.schema';
 import * as moment from 'moment';
 
-@Injectable()
+@Injectable({ scope: Scope.DEFAULT })
 export class RoomService {
   constructor(
     @Inject('RoomRepositoryInterface')

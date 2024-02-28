@@ -11,25 +11,29 @@ import { NewUserDto } from './dtos/new-user.dto';
 import { ExistingUserDto } from './dtos/existing-user.dto';
 import { JwtGuard } from './jwt.guard';
 import { R_jwtGuard } from './r_jwt.guard';
+import { DtoFactory } from './dtos/dto.factory';
 
 @Controller()
 export class AuthController {
+  private dtoFactory: DtoFactory;
   constructor(
     private readonly authService: AuthService,
     @Inject('SharedServiceInterface')
     private readonly sharedService: SharedService,
-  ) {}
+  ) {
+    this.dtoFactory = new DtoFactory();
+  }
 
   @MessagePattern({ cmd: 'register' })
-  Register(@Payload() newUser: NewUserDto, @Ctx() context: RmqContext) {
+  Register(@Payload() newUser, @Ctx() context: RmqContext) {
     this.sharedService.acknowledgeMessage(context);
-    return this.authService.register(newUser);
+    return this.authService.register(this.dtoFactory.createNewUser(newUser));
   }
 
   @MessagePattern({ cmd: 'login' })
-  Login(@Payload() existingUser: ExistingUserDto, @Ctx() context: RmqContext) {
+  Login(@Payload() existingUser, @Ctx() context: RmqContext) {
     this.sharedService.acknowledgeMessage(context);
-    return this.authService.login(existingUser);
+    return this.authService.login(this.dtoFactory.ExistingUser(existingUser));
   }
   @MessagePattern({ cmd: 'refresh' })
   refreshToken(

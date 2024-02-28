@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { SharedModule } from '@app/shared';
@@ -6,6 +6,7 @@ import * as process from 'process';
 import { AuthGuard } from '@app/shared/guards/auth.guard';
 import { Auth_rGuard } from '@app/shared/guards/auth_r.guard';
 import { RolesGuard } from '@app/shared/guards/roles.guard';
+import { LoggerMiddleware } from './logger.middleware';
 
 @Module({
   imports: [
@@ -19,4 +20,10 @@ import { RolesGuard } from '@app/shared/guards/roles.guard';
   controllers: [AppController],
   providers: [AppService, AuthGuard, Auth_rGuard, RolesGuard],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(LoggerMiddleware)
+      .forRoutes({ path: '*', method: RequestMethod.ALL });
+  }
+}

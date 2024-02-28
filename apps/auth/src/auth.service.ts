@@ -3,6 +3,7 @@ import {
   HttpStatus,
   Inject,
   Injectable,
+  Scope,
   UnauthorizedException,
 } from '@nestjs/common';
 import { UserRepositoryInterface } from '@app/shared/interfaces/user.repository.interface';
@@ -12,7 +13,7 @@ import { ExistingUserDto } from './dtos/existing-user.dto';
 import { JwtService } from '@nestjs/jwt';
 import { BookingRepositoryInterface } from '@app/shared/interfaces/booking.repository.interface';
 
-@Injectable()
+@Injectable({ scope: Scope.DEFAULT })
 export class AuthService {
   constructor(
     @Inject('UserRepositoryInterface')
