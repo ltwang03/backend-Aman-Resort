@@ -42,7 +42,7 @@ export abstract class BaseRepositoryAbstract<T extends BaseEntity>
     options?: QueryOptions<T>,
   ): Promise<FindAllResponse<T>> {
     const [count, items] = await Promise.all([
-      this.model.count({ ...condition, delete_at: null }),
+      this.model.countDocuments({ ...condition, delete_at: null }),
       this.model
         .find({ ...condition, delete_at: null }, options?.projection, options)
         ?.populate(fieldPopulate_1)
