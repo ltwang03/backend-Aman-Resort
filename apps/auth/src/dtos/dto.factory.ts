@@ -3,10 +3,22 @@ import { ExistingUserDto } from './existing-user.dto';
 import { IDtoFactory } from './IDtoFactory.interface';
 
 export class DtoFactory implements IDtoFactory {
-  createNewUser(data: any): NewUserDto {
-    return new NewUserDto(data);
+  createDto(type: string, data: any):any {
+    switch(type) {
+      case 'NewUser':
+        return this.createNewUser(data);
+      case 'ExistingUser':
+        return this.createExistingUser(data);
+      default:
+        throw new Error(`DTO type ${type} not recognized.`);
+    }
   }
-  ExistingUser(data: any): ExistingUserDto {
-    return new ExistingUserDto(data);
+
+  public createNewUser(data: any): NewUserDto {
+    return new NewUserDto(data)
+  }
+
+  public createExistingUser(data: any): ExistingUserDto {
+    return new ExistingUserDto(data)
   }
 }

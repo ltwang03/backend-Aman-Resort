@@ -7,19 +7,19 @@ import {
   RmqContext,
 } from '@nestjs/microservices';
 import { SharedService } from '@app/shared';
-import { NewUserDto } from './dtos/new-user.dto';
-import { ExistingUserDto } from './dtos/existing-user.dto';
 import { JwtGuard } from './jwt.guard';
 import { R_jwtGuard } from './r_jwt.guard';
 import { DtoFactory } from './dtos/dto.factory';
 
 @Controller()
 export class AuthController {
-  private dtoFactory: DtoFactory;
+  private readonly dtoFactory: DtoFactory;
   constructor(
     private readonly authService: AuthService,
     @Inject('SharedServiceInterface')
     private readonly sharedService: SharedService,
+
+
   ) {
     this.dtoFactory = new DtoFactory();
   }
@@ -27,13 +27,13 @@ export class AuthController {
   @MessagePattern({ cmd: 'register' })
   Register(@Payload() newUser, @Ctx() context: RmqContext) {
     this.sharedService.acknowledgeMessage(context);
-    return this.authService.register(this.dtoFactory.createNewUser(newUser));
+    return this.authService.register(this.dtoFactory.createDto("NewUser", newUser));
   }
 
   @MessagePattern({ cmd: 'login' })
   Login(@Payload() existingUser, @Ctx() context: RmqContext) {
     this.sharedService.acknowledgeMessage(context);
-    return this.authService.login(this.dtoFactory.ExistingUser(existingUser));
+    return this.authService.login(this.dtoFactory.createDto("ExistingUser",existingUser));
   }
   @MessagePattern({ cmd: 'refresh' })
   refreshToken(
