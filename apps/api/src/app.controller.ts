@@ -57,6 +57,18 @@ export class AppController {
     return this.authService.send({ cmd: 'login' }, { email, password });
   }
 
+  @Post('auth/login/v2')
+  async loginV2(@Body() existingUser: ExistingUserDto) {
+    const {email, password} = existingUser;
+    return this.authService.send({cmd:'login-v2'}, {email,password});
+  }
+
+  @Post('auth/verify/2fa')
+  async verify2fa(@Body() body:any) {
+    const {otp} = body;
+    return this.authService.send({cmd:'verify-otp'}, {otp});
+  }
+
   @UseGuards(Auth_rGuard)
   @Get('auth/refresh')
   async refresh(@Req() request: Request) {

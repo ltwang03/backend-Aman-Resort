@@ -11,15 +11,19 @@ import { NewUserDto } from './dtos/new-user.dto';
 import * as bcrypt from 'bcrypt';
 import { ExistingUserDto } from './dtos/existing-user.dto';
 import { JwtService } from '@nestjs/jwt';
-import { BookingRepositoryInterface } from '@app/shared/interfaces/booking.repository.interface';
+import { codeGenerator } from './utils/codeGenarator';
+import { OtpRepositoryInterface } from '@app/shared/interfaces/otp.repository.interface';
+import { getExpiry, isTokenExpired } from './utils/dateTimeUtility';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable({ scope: Scope.DEFAULT })
 export class AuthService {
   constructor(
     @Inject('UserRepositoryInterface')
     private readonly UserRepository: UserRepositoryInterface,
-    @Inject('BookingRepositoryInterface')
-    private readonly BookingRepository: BookingRepositoryInterface,
+    @Inject('OtpRepositoryInterface')
+    private readonly  OtpRepository: OtpRepositoryInterface,
+    private readonly mailerService: MailerService,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -91,7 +95,6 @@ export class AuthService {
   }
   async validateUser(email: string, _password: string) {
     const user: any = await this.UserRepository.findOneByCondition({ email });
-
     const doesUserExist = !!user;
     if (!doesUserExist) return null;
     const doesPasswordMatch = await this.doesPasswordMatch(
@@ -122,6 +125,7 @@ export class AuthService {
           HttpStatus.UNAUTHORIZED,
         );
       }
+
       const { access_token, refresh_token } = await this.generateToken(user);
       await this.UserRepository.update(user._id, { r_token: refresh_token });
       return { access_token, refresh_token };
@@ -131,6 +135,86 @@ export class AuthService {
       }
       return e;
     }
+  }
+
+  async loginV2(existingUser: Readonly<ExistingUserDto>) {
+    try {
+      const { email, password } = existingUser;
+      const user = await this.validateUser(email, password);
+      if (!user) {
+        throw new HttpException(
+          'Invalid Email or Password',
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+      if(!user.twoFA) {
+        const { access_token, refresh_token } = await this.generateToken(user);
+        await this.UserRepository.update(user._id, { r_token: refresh_token });
+        return { access_token, refresh_token };
+      }
+      const otp = codeGenerator(6);
+      await this.OtpRepository.create({
+        userId: user._id,
+        otp,
+        useCase: 'LOGIN',
+        isExpire: getExpiry()
+      })
+
+      await this.mailerService.sendMail({
+        to: user.email,
+        subject: "[Aman Resort] Verification Code",
+        template: 'mail-confirmation',
+        context: {
+          name: user.email,
+          code: otp,
+        }
+      })
+      return {success: true, status: 'wait OTP'}
+    } catch (e) {
+      if (e instanceof HttpException) {
+        return { error: e.getResponse(), statusCode: e.getStatus() };
+      }
+      return e;
+    }
+  }
+
+  async verifyOtp(payload: any) {
+    try {
+      const {otp} = payload;
+      const otpRecord = await this.OtpRepository.findOneByCondition({otp, useCase: 'LOGIN'});
+      if(!otpRecord) {
+        throw new HttpException('Invalid OTP', HttpStatus.NOT_FOUND);
+      }
+      const isExpired = isTokenExpired(otpRecord.isExpire);
+      if (isExpired) {
+        throw new HttpException('Expired token', HttpStatus.NOT_FOUND);
+      }
+      const user:any = await this.UserRepository.findOneByCondition({_id: otpRecord.userId});
+      if(!user) {
+        throw new HttpException('Invalid OTP', HttpStatus.NOT_FOUND);
+      }
+
+      const {
+        delete_at,
+        created_at,
+        updated_at,
+        password,
+        __v,
+        r_token,
+        booked,
+        phone,
+        ...newUser
+      } = user._doc;
+      const { access_token, refresh_token } = await this.generateToken(newUser);
+      await this.UserRepository.update(user._id, { r_token: refresh_token });
+      return { access_token, refresh_token };
+    }catch (e) {
+      if (e instanceof HttpException) {
+        return { error: e.getResponse(), statusCode: e.getStatus() };
+      }
+      return e;
+    }
+
   }
 
   async refreshToken(token: string) {

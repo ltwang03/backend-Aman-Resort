@@ -4,7 +4,6 @@ import {
   UploadApiErrorResponse,
   v2 as cloudinary,
 } from 'cloudinary';
-// import streamifier from 'streamifier';
 const streamifier = require('streamifier');
 @Injectable()
 export class StorageService {

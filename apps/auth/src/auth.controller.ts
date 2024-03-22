@@ -35,6 +35,19 @@ export class AuthController {
     this.sharedService.acknowledgeMessage(context);
     return this.authService.login(this.dtoFactory.createDto("ExistingUser",existingUser));
   }
+
+  @MessagePattern({cmd: 'login-v2'})
+  loginV2(@Payload() existingUser, @Ctx() context: RmqContext) {
+    this.sharedService.acknowledgeMessage(context);
+    return this.authService.loginV2(this.dtoFactory.createDto("ExistingUser", existingUser));
+  }
+
+  @MessagePattern({cmd: 'verify-otp'})
+  verifyOtp(@Payload() payload,@Ctx() context: RmqContext) {
+    this.sharedService.acknowledgeMessage(context);
+    return this.authService.verifyOtp(payload);
+}
+
   @MessagePattern({ cmd: 'refresh' })
   refreshToken(
     @Payload() payload: { token: string },

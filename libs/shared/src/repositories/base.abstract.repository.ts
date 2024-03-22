@@ -2,7 +2,6 @@ import { BaseEntity } from '@app/shared/repositories/bases/base.entity';
 import { FilterQuery, Model, Query, QueryOptions } from 'mongoose';
 import { FindAllResponse } from '@app/shared/repositories/types/common.type';
 import { BaseInterfaceRepository } from '@app/shared/repositories/bases/base.interface.repository';
-import { Room, RoomDocument } from '@app/shared/schemas/room.schema';
 
 export abstract class BaseRepositoryAbstract<T extends BaseEntity>
   implements BaseInterfaceRepository<T>

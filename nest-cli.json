@@ -25,6 +25,8 @@
       "entryFile": "main",
       "sourceRoot": "apps/auth/src",
       "compilerOptions": {
+        "assets": ["mail/templates/**/*"],
+        "watchAssets": true,
         "tsConfigPath": "apps/auth/tsconfig.app.json"
       }
     },

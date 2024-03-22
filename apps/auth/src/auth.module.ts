@@ -13,6 +13,9 @@ import { R_jwtGuard } from './r_jwt.guard';
 import { R_jwtStrategy } from './strategies/r_jwt.strategy';
 import { BookingRepository } from '@app/shared/repositories/booking.repository';
 import { Booking, BookingSchema } from '@app/shared/schemas/booking.schema';
+import { OtpRepository } from '@app/shared/repositories/otp.repository';
+import { OTP, OTPSchema } from '@app/shared/schemas/otp.schema';
+import { MailModule } from './mail/mail.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -26,10 +29,12 @@ import { Booking, BookingSchema } from '@app/shared/schemas/booking.schema';
       inject: [ConfigService],
     }),
     SharedModule,
+    MailModule,
     MongodbModule,
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },
       { name: Booking.name, schema: BookingSchema },
+      {name: OTP.name, schema: OTPSchema}
     ]),
   ],
   controllers: [AuthController],
@@ -43,6 +48,7 @@ import { Booking, BookingSchema } from '@app/shared/schemas/booking.schema';
     { provide: 'SharedServiceInterface', useClass: SharedService },
     { provide: 'UserRepositoryInterface', useClass: UserRepository },
     { provide: 'BookingRepositoryInterface', useClass: BookingRepository },
+    {provide:'OtpRepositoryInterface', useClass: OtpRepository}
   ],
 })
 export class AuthModule {}

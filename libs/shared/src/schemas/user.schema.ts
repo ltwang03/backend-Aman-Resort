@@ -42,6 +42,8 @@ export class User extends BaseEntity {
   booked?: Booking;
   @Prop({ type: String, enum: Role, default: Role.User })
   role: Role;
+  @Prop({type: Boolean, default: false})
+  twoFA: boolean;
 }
 
 export type UserDocument = HydratedDocument<User>;
