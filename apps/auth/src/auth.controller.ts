@@ -1,4 +1,4 @@
-import { Controller, Inject, UseGuards } from '@nestjs/common';
+import { Controller, HttpStatus, Inject, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
   Ctx,
@@ -7,9 +7,11 @@ import {
   RmqContext,
 } from '@nestjs/microservices';
 import { SharedService } from '@app/shared';
-import { JwtGuard } from './jwt.guard';
-import { R_jwtGuard } from './r_jwt.guard';
+import { JwtGuard } from './guards/jwt.guard';
+import { R_jwtGuard } from './guards/r_jwt.guard';
 import { DtoFactory } from './dtos/dto.factory';
+import { FacebookGuard } from '../../api/src/guards/facebook.guard';
+import * as http from 'http';
 
 @Controller()
 export class AuthController {
@@ -18,8 +20,6 @@ export class AuthController {
     private readonly authService: AuthService,
     @Inject('SharedServiceInterface')
     private readonly sharedService: SharedService,
-
-
   ) {
     this.dtoFactory = new DtoFactory();
   }
@@ -27,26 +27,44 @@ export class AuthController {
   @MessagePattern({ cmd: 'register' })
   Register(@Payload() newUser, @Ctx() context: RmqContext) {
     this.sharedService.acknowledgeMessage(context);
-    return this.authService.register(this.dtoFactory.createDto("NewUser", newUser));
+    return this.authService.register(
+      this.dtoFactory.createDto('NewUser', newUser),
+    );
   }
 
   @MessagePattern({ cmd: 'login' })
   Login(@Payload() existingUser, @Ctx() context: RmqContext) {
     this.sharedService.acknowledgeMessage(context);
-    return this.authService.login(this.dtoFactory.createDto("ExistingUser",existingUser));
+    return this.authService.login(
+      this.dtoFactory.createDto('ExistingUser', existingUser),
+    );
   }
 
-  @MessagePattern({cmd: 'login-v2'})
+  @MessagePattern({ cmd: 'google' })
+  FacebookLogin(@Ctx() context: RmqContext) {
+    this.sharedService.acknowledgeMessage(context);
+    return HttpStatus.OK;
+  }
+
+  @MessagePattern({ cmd: 'google-redirect' })
+  FacebookLoginRedirect(@Payload() payload: any, @Ctx() context: RmqContext) {
+    this.sharedService.acknowledgeMessage(context);
+    return this.authService.googleRedirect(payload.data);
+  }
+
+  @MessagePattern({ cmd: 'login-v2' })
   loginV2(@Payload() existingUser, @Ctx() context: RmqContext) {
     this.sharedService.acknowledgeMessage(context);
-    return this.authService.loginV2(this.dtoFactory.createDto("ExistingUser", existingUser));
+    return this.authService.loginV2(
+      this.dtoFactory.createDto('ExistingUser', existingUser),
+    );
   }
 
-  @MessagePattern({cmd: 'verify-otp'})
-  verifyOtp(@Payload() payload,@Ctx() context: RmqContext) {
+  @MessagePattern({ cmd: 'verify-otp' })
+  verifyOtp(@Payload() payload, @Ctx() context: RmqContext) {
     this.sharedService.acknowledgeMessage(context);
     return this.authService.verifyOtp(payload);
-}
+  }
 
   @MessagePattern({ cmd: 'refresh' })
   refreshToken(

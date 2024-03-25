@@ -19,11 +19,10 @@ export class User extends BaseEntity {
   lastname: string;
   @Prop({
     type: String,
-    required: true,
     unique: true,
   })
   phone: string;
-  @Prop({ type: String, required: true })
+  @Prop({ type: String })
   country: string;
   @Prop({
     type: String,
@@ -34,7 +33,7 @@ export class User extends BaseEntity {
   email: string;
   @Prop({ type: String })
   date_of_birth: string;
-  @Prop({ type: String, required: true })
+  @Prop({ type: String })
   password: string;
   @Prop({ type: String })
   r_token?: string;
@@ -42,7 +41,7 @@ export class User extends BaseEntity {
   booked?: Booking;
   @Prop({ type: String, enum: Role, default: Role.User })
   role: Role;
-  @Prop({type: Boolean, default: false})
+  @Prop({ type: Boolean, default: false, required: true })
   twoFA: boolean;
 }
 

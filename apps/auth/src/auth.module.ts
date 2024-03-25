@@ -7,15 +7,16 @@ import { User, UserSchema } from '@app/shared/schemas/user.schema';
 import { UserRepository } from '@app/shared/repositories/user.repository';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { JwtGuard } from './jwt.guard';
+import { JwtGuard } from './guards/jwt.guard';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { R_jwtGuard } from './r_jwt.guard';
+import { R_jwtGuard } from './guards/r_jwt.guard';
 import { R_jwtStrategy } from './strategies/r_jwt.strategy';
 import { BookingRepository } from '@app/shared/repositories/booking.repository';
 import { Booking, BookingSchema } from '@app/shared/schemas/booking.schema';
 import { OtpRepository } from '@app/shared/repositories/otp.repository';
 import { OTP, OTPSchema } from '@app/shared/schemas/otp.schema';
 import { MailModule } from './mail/mail.module';
+import { PassportModule } from '@nestjs/passport';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -30,6 +31,7 @@ import { MailModule } from './mail/mail.module';
     }),
     SharedModule,
     MailModule,
+    PassportModule,
     MongodbModule,
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },

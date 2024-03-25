@@ -13,6 +13,8 @@ import {
   Delete,
   Patch,
   Put,
+  HttpStatus,
+  HttpCode,
 } from '@nestjs/common';
 import { AppService } from './app.service';
 
@@ -33,6 +35,8 @@ import { AddUserFromAdminDto } from './dtos/add-user-from-admin.dto';
 import { EditUserDto } from './dtos/edt-user.dto';
 import { EditMeDto } from './dtos/edit-me.dto';
 import { EditBookingDto } from './dtos/edit-booking.dto';
+import { FacebookGuard } from './guards/facebook.guard';
+import { GoogleGuard } from './guards/google.guard';
 
 @Controller()
 export class AppController {
@@ -59,14 +63,43 @@ export class AppController {
 
   @Post('auth/login/v2')
   async loginV2(@Body() existingUser: ExistingUserDto) {
-    const {email, password} = existingUser;
-    return this.authService.send({cmd:'login-v2'}, {email,password});
+    const { email, password } = existingUser;
+    return this.authService.send({ cmd: 'login-v2' }, { email, password });
   }
 
   @Post('auth/verify/2fa')
-  async verify2fa(@Body() body:any) {
-    const {otp} = body;
-    return this.authService.send({cmd:'verify-otp'}, {otp});
+  async verify2fa(@Body() body: any) {
+    const { otp } = body;
+    return this.authService.send({ cmd: 'verify-otp' }, { otp });
+  }
+
+  @Get('auth/facebook')
+  @UseGuards(FacebookGuard)
+  async facebookLogin() {
+    return this.authService.send({ cmd: 'facebook' }, {});
+  }
+
+  @Get('auth/facebook/redirect')
+  @UseGuards(FacebookGuard)
+  async facebookLoginRedirect(@Req() req: Request) {
+    return {
+      statusCode: HttpStatus.OK,
+      data: req.user,
+    };
+  }
+
+  @Get('auth/google')
+  @UseGuards(GoogleGuard)
+  async googleLogin() {
+    return this.authService.send({ cmd: 'google' }, {});
+  }
+  @Get('auth/google/redirect')
+  @UseGuards(GoogleGuard)
+  async googleLoginRedirect(@Req() req: Request) {
+    return this.authService.send(
+      { cmd: 'google-redirect' },
+      { data: req.user },
+    );
   }
 
   @UseGuards(Auth_rGuard)

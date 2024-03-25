@@ -15,6 +15,7 @@ import { codeGenerator } from './utils/codeGenarator';
 import { OtpRepositoryInterface } from '@app/shared/interfaces/otp.repository.interface';
 import { getExpiry, isTokenExpired } from './utils/dateTimeUtility';
 import { MailerService } from '@nestjs-modules/mailer';
+import { Request } from 'express';
 
 @Injectable({ scope: Scope.DEFAULT })
 export class AuthService {
@@ -22,7 +23,7 @@ export class AuthService {
     @Inject('UserRepositoryInterface')
     private readonly UserRepository: UserRepositoryInterface,
     @Inject('OtpRepositoryInterface')
-    private readonly  OtpRepository: OtpRepositoryInterface,
+    private readonly OtpRepository: OtpRepositoryInterface,
     private readonly mailerService: MailerService,
     private readonly jwtService: JwtService,
   ) {}
@@ -147,7 +148,7 @@ export class AuthService {
           HttpStatus.UNAUTHORIZED,
         );
       }
-      if(!user.twoFA) {
+      if (!user.twoFA) {
         const { access_token, refresh_token } = await this.generateToken(user);
         await this.UserRepository.update(user._id, { r_token: refresh_token });
         return { access_token, refresh_token };
@@ -157,19 +158,19 @@ export class AuthService {
         userId: user._id,
         otp,
         useCase: 'LOGIN',
-        isExpire: getExpiry()
-      })
+        isExpire: getExpiry(),
+      });
 
       await this.mailerService.sendMail({
         to: user.email,
-        subject: "[Aman Resort] Verification Code",
+        subject: '[Aman Resort] Verification Code',
         template: 'mail-confirmation',
         context: {
           name: user.email,
           code: otp,
-        }
-      })
-      return {success: true, status: 'wait OTP'}
+        },
+      });
+      return { success: true, status: 'wait OTP' };
     } catch (e) {
       if (e instanceof HttpException) {
         return { error: e.getResponse(), statusCode: e.getStatus() };
@@ -180,17 +181,22 @@ export class AuthService {
 
   async verifyOtp(payload: any) {
     try {
-      const {otp} = payload;
-      const otpRecord = await this.OtpRepository.findOneByCondition({otp, useCase: 'LOGIN'});
-      if(!otpRecord) {
+      const { otp } = payload;
+      const otpRecord = await this.OtpRepository.findOneByCondition({
+        otp,
+        useCase: 'LOGIN',
+      });
+      if (!otpRecord) {
         throw new HttpException('Invalid OTP', HttpStatus.NOT_FOUND);
       }
       const isExpired = isTokenExpired(otpRecord.isExpire);
       if (isExpired) {
         throw new HttpException('Expired token', HttpStatus.NOT_FOUND);
       }
-      const user:any = await this.UserRepository.findOneByCondition({_id: otpRecord.userId});
-      if(!user) {
+      const user: any = await this.UserRepository.findOneByCondition({
+        _id: otpRecord.userId,
+      });
+      if (!user) {
         throw new HttpException('Invalid OTP', HttpStatus.NOT_FOUND);
       }
 
@@ -208,13 +214,12 @@ export class AuthService {
       const { access_token, refresh_token } = await this.generateToken(newUser);
       await this.UserRepository.update(user._id, { r_token: refresh_token });
       return { access_token, refresh_token };
-    }catch (e) {
+    } catch (e) {
       if (e instanceof HttpException) {
         return { error: e.getResponse(), statusCode: e.getStatus() };
       }
       return e;
     }
-
   }
 
   async refreshToken(token: string) {
@@ -439,5 +444,32 @@ export class AuthService {
     } catch (error) {
       return error;
     }
+  }
+  async googleRedirect(user: any): Promise<any> {
+    if (!user) {
+      throw new HttpException('user not found', HttpStatus.NOT_FOUND);
+    }
+    const existUser = await this.UserRepository.findOneByCondition({
+      email: user.email,
+    });
+
+    if (!existUser) {
+      const newUser = await this.UserRepository.create({
+        firstname: user.firstname,
+        lastname: user.lastname,
+        country: 'Vietnam',
+        email: user.email,
+      });
+      const { access_token, refresh_token } = await this.generateToken(newUser);
+      return {
+        access_token,
+        refresh_token,
+      };
+    }
+    const { access_token, refresh_token } = await this.generateToken(existUser);
+    return {
+      access_token,
+      refresh_token,
+    };
   }
 }
