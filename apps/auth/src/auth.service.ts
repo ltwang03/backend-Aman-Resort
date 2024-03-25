@@ -460,16 +460,8 @@ export class AuthService {
         country: 'Vietnam',
         email: user.email,
       });
-      const { access_token, refresh_token } = await this.generateToken(newUser);
-      return {
-        access_token,
-        refresh_token,
-      };
+      return await this.generateToken(newUser);
     }
-    const { access_token, refresh_token } = await this.generateToken(existUser);
-    return {
-      access_token,
-      refresh_token,
-    };
+    return await this.generateToken(existUser);
   }
 }
