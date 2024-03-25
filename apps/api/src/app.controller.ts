@@ -14,7 +14,7 @@ import {
   Patch,
   Put,
   HttpStatus,
-  HttpCode,
+  Res,
 } from '@nestjs/common';
 import { AppService } from './app.service';
 
@@ -23,7 +23,7 @@ import { NewUserDto } from './dtos/new-user.dto';
 import { ExistingUserDto } from './dtos/existing-user.dto';
 import { AuthGuard } from '@app/shared/guards/auth.guard';
 import { Auth_rGuard } from '@app/shared/guards/auth_r.guard';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { Roles } from '@app/shared/decorators/roles.decorator';
 import { Role } from '@app/shared/decorators/role.enum';
 import { NewAmenityDto } from './dtos/new-amenity.dto';
@@ -93,13 +93,16 @@ export class AppController {
   async googleLogin() {
     return this.authService.send({ cmd: 'google' }, {});
   }
+
   @Get('auth/google/redirect')
   @UseGuards(GoogleGuard)
-  async googleLoginRedirect(@Req() req: Request) {
-    return this.authService.send(
-      { cmd: 'google-redirect' },
-      { data: req.user },
-    );
+  async googleLoginRedirect(@Req() req: Request, @Res() res: Response) {
+    const data: any = await this.authService
+      .send({ cmd: 'google-redirect' }, { data: req.user })
+      .toPromise();
+    console.log(data.access_token);
+    res.cookie('token', data.access_token);
+    res.redirect('http://localhost:5173');
   }
 
   @UseGuards(Auth_rGuard)

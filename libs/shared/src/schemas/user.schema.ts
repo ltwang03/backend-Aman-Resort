@@ -19,7 +19,6 @@ export class User extends BaseEntity {
   lastname: string;
   @Prop({
     type: String,
-    unique: true,
   })
   phone: string;
   @Prop({ type: String })
