@@ -37,6 +37,7 @@ import { EditMeDto } from './dtos/edit-me.dto';
 import { EditBookingDto } from './dtos/edit-booking.dto';
 import { FacebookGuard } from './guards/facebook.guard';
 import { GoogleGuard } from './guards/google.guard';
+import { CreateUrlVNpayDto } from './dtos/create-url-vnpay.dto';
 
 @Controller()
 export class AppController {
@@ -414,6 +415,18 @@ export class AppController {
     return this.bookingService.send(
       { cmd: 'edit-booking-by-id' },
       { ...body, id },
+    );
+  }
+
+  @Get('bookings/payment/url')
+  async createPaymentUrl(@Body() body: CreateUrlVNpayDto) {
+    return this.bookingService.send({ cmd: 'create-payment-url' }, { ...body });
+  }
+  @Get('bookings/payment/verify-ipn')
+  async ipnVerify(@Query() query) {
+    return this.bookingService.send(
+      { cmd: 'verify-ipn-payment' },
+      { ...query },
     );
   }
 }

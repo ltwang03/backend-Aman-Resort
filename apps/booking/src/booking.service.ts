@@ -11,6 +11,18 @@ import { BookingRepositoryInterface } from '@app/shared/interfaces/booking.repos
 import { UserRepositoryInterface } from '@app/shared/interfaces/user.repository.interface';
 import * as jwt from 'jsonwebtoken';
 import * as moment from 'moment';
+import { VnpayService } from './vnpay/vnpay.service';
+import {
+  IpnFailChecksum,
+  IpnInvalidAmount,
+  IpnOrderNotFound,
+  IpnResponse,
+  IpnSuccess,
+  IpnUnknownError,
+  ReturnQueryFromVNPay,
+  VerifyReturnUrl,
+} from 'vnpay';
+import { TransactionRepositoryInterface } from '@app/shared/interfaces/transaction.repository.interface';
 
 enum Status {
   confirmed = 'Đã xác nhận',
@@ -27,6 +39,9 @@ export class BookingService {
     private readonly BookingRepository: BookingRepositoryInterface,
     @Inject('UserRepositoryInterface')
     private readonly UserRepository: UserRepositoryInterface,
+    @Inject('TransactionRepositoryInterface')
+    private readonly TransactionRepository: TransactionRepositoryInterface,
+    private readonly vnpayService: VnpayService,
   ) {}
   async booking(payload) {
     const { start, end, access_token, ...others } = payload;
@@ -65,7 +80,7 @@ export class BookingService {
           { booked: saveBooking },
         );
       }
-      return { status: 'Đặt phòng thành công', code: 200 };
+      return { status: 'Đặt phòng thành công', code: 200, data: saveBooking };
     } catch (e) {
       return e;
     }
@@ -152,6 +167,54 @@ export class BookingService {
       return { message: 'Edited', code: 200 };
     } catch (error) {
       return error;
+    }
+  }
+  async createPaymentUrl(params, bookingId) {
+    const urlPayment = await this.vnpayService.CreatePaymentUrl(
+      params,
+      bookingId,
+    );
+    return {
+      url: urlPayment,
+    };
+  }
+  async verifyIPNUrl(query: ReturnQueryFromVNPay) {
+    try {
+      const verify: VerifyReturnUrl = await this.vnpayService.verifyIPN(query);
+      if (!verify.isVerified) {
+        return { IpnFailChecksum };
+      }
+      const bookingId = query.vnp_OrderInfo.split('-')[1];
+      const saveTransaction = await this.TransactionRepository.create({
+        order_id: query.vnp_TxnRef,
+        amount: query.vnp_Amount,
+        status_payment: query.vnp_TransactionStatus,
+        bank_code: query.vnp_BankCode,
+        card_type: query.vnp_CardType,
+        booking_id: bookingId,
+      });
+
+      const changeStatusBooking = await this.BookingRepository.update(
+        bookingId,
+        {
+          payment_status: 'Đã thanh toán',
+          status: 'Đã xác nhận',
+        },
+      );
+      if (
+        !saveTransaction ||
+        !changeStatusBooking ||
+        verify.vnp_TxnRef != saveTransaction.order_id
+      ) {
+        return { IpnOrderNotFound };
+      }
+      if (verify.vnp_Amount != saveTransaction.amount) {
+        return { IpnInvalidAmount };
+      }
+      return { IpnSuccess };
+    } catch (e) {
+      console.log(`verify not found`);
+      return { IpnUnknownError };
     }
   }
 }

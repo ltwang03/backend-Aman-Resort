@@ -67,4 +67,15 @@ export class BookingController {
     this.sharedService.acknowledgeMessage(context);
     return this.bookingService.editBookingById(payload);
   }
+  @MessagePattern({ cmd: 'create-payment-url' })
+  async createPayementUrl(@Ctx() context: RmqContext, @Payload() payload) {
+    const { booking_id: bookingId, ...params } = payload;
+    this.sharedService.acknowledgeMessage(context);
+    return this.bookingService.createPaymentUrl(params, bookingId);
+  }
+  @MessagePattern({ cmd: 'verify-ipn-payment' })
+  async verifyIPN(@Ctx() context: RmqContext, @Payload() query) {
+    this.sharedService.acknowledgeMessage(context);
+    return this.bookingService.verifyIPNUrl(query);
+  }
 }
