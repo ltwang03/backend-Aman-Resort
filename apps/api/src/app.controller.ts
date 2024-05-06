@@ -418,7 +418,7 @@ export class AppController {
     );
   }
 
-  @Get('bookings/payment/url')
+  @Post('bookings/payment/url')
   async createPaymentUrl(@Body() body: CreateUrlVNpayDto) {
     return this.bookingService.send({ cmd: 'create-payment-url' }, { ...body });
   }
