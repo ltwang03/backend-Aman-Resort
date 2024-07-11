@@ -6,7 +6,9 @@ import {
   VNPay,
 } from 'vnpay';
 import * as moment from 'moment';
-
+import * as dotenv from 'dotenv';
+import * as process from 'node:process';
+dotenv.config();
 @Injectable()
 export class VnpayService {
   constructor(private readonly vnpay: VNPay) {}
@@ -23,7 +25,7 @@ export class VnpayService {
       vnp_TxnRef: moment(date).format('HHmmss'),
       vnp_OrderInfo: `TEST-${bookingId}-${vnp_OrderInfo}`,
       vnp_OrderType: `other`,
-      vnp_ReturnUrl: 'http://localhost:5173/payment/success',
+      vnp_ReturnUrl: `${process.env.FE_ENDPOINT}/payment/success`,
     });
     return urlString;
   }
