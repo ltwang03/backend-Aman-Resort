@@ -28,8 +28,8 @@ import {
     SharedModule.registerRmq('AUTH_SERVICE', process.env.RABBITMQ_AUTH_QUEUE),
     VNpayModule.forRoot({
       vnpayHost: 'https://sandbox.vnpayment.vn',
-      secureSecret: 'NIXEWBOLCUWMEPOJKTEBSYRSXZKRNJXY',
-      tmnCode: 'F20I0Q8E',
+      secureSecret: 'TOIQ2XRE15OJRCQSH288FP6EKOYC3JSB',
+      tmnCode: 'VHXGOZEJ',
     }),
     MongodbModule,
     MongooseModule.forFeature([
