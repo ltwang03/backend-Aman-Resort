@@ -1,73 +1,175 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+Certainly! Below is a clean and production-style documentation section in **English** for setting up **NGINX Ingress Controller with NodePort**, suitable for **testing traffic** on a Kubernetes cluster (like the one you installed via Kubespray).
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+---
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+# 🌐 Deploying NGINX Ingress Controller (NodePort) for Traffic Testing
 
-## Description
+This guide installs the **NGINX Ingress Controller** using **Helm**, configured to expose HTTP and HTTPS traffic via **NodePort** services.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+---
 
-## Installation
+## 📋 Requirements
+
+* Kubernetes cluster is already running and reachable.
+* Helm is installed on your control machine (`helm version`).
+* Nodes in your cluster expose **ports 30080 (HTTP)** and **30443 (HTTPS)** to the outside (e.g., via HAProxy or direct access).
+
+---
+
+## 📁 Step 1: Add the Ingress-NGINX Helm Repository
 
 ```bash
-$ npm install
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo update
 ```
 
-## Running the app
+---
+
+## 🚀 Step 2: Install the Ingress Controller using NodePort
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
+  --namespace ingress-nginx --create-namespace \
+  --set controller.service.type=NodePort \
+  --set controller.service.nodePorts.http=30080 \
+  --set controller.service.nodePorts.https=30443 \
+  --set controller.publishService.enabled=false
 ```
 
-## Test
+This will:
+
+* Create the `ingress-nginx` namespace
+* Deploy the controller
+* Expose HTTP on `NodePort 30080` and HTTPS on `30443`
+
+---
+
+## ✅ Step 3: Verify the Deployment
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+kubectl get all -n ingress-nginx
 ```
 
-## Support
+Check that the controller Pod is running and the service is correctly exposed:
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
+kubectl get svc -n ingress-nginx ingress-nginx-controller
+```
 
-## Stay in touch
+Expected output:
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```
+NAME                       TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)                      AGE
+ingress-nginx-controller   NodePort   10.x.x.x       <none>        80:30080/TCP,443:30443/TCP   2m
+```
 
-## License
+---
 
-Nest is [MIT licensed](LICENSE).
+## 🧪 Step 4: Deploy a Sample App with Ingress
+
+Create a file `ingress-demo.yaml`:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httpd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: httpd
+  template:
+    metadata:
+      labels:
+        app: httpd
+    spec:
+      containers:
+      - name: httpd
+        image: httpd:2.4
+        ports:
+        - containerPort: 80
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: httpd
+spec:
+  selector:
+    app: httpd
+  ports:
+  - port: 80
+    targetPort: 80
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: httpd-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: httpd.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: httpd
+            port:
+              number: 80
+```
+
+Apply it:
+
+```bash
+kubectl apply -f ingress-demo.yaml
+```
+
+---
+
+## 🖥 Step 5: Add Host Entry for Testing
+
+On your **local machine** (host), add to `/etc/hosts`:
+
+```
+192.168.56.17 httpd.local
+```
+
+> Replace `192.168.56.17` with the IP of the HAProxy node or any worker node exposing port `30080`.
+
+---
+
+## 🌐 Step 6: Test HTTP Access
+
+```bash
+curl http://httpd.local
+```
+
+Expected result: `It works!` (Apache default page)
+
+Or open in browser:
+
+```
+http://httpd.local
+```
+
+---
+
+## ✅ Summary
+
+| Purpose              | Value             |
+| -------------------- | ----------------- |
+| HTTP NodePort        | `30080`           |
+| HTTPS NodePort       | `30443`           |
+| Test Hostname        | `httpd.local`     |
+| Controller Namespace | `ingress-nginx`   |
+| Access via           | HAProxy or direct |
+
+---
+
+Would you like me to extend this with a TLS (HTTPS) example or add automated cleanup?
