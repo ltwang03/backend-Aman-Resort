@@ -1,31 +1,21 @@
-Certainly! Below is a clean and production-style documentation section in **English** for setting up **NGINX Ingress Controller with NodePort**, suitable for **testing traffic** on a Kubernetes cluster (like the one you installed via Kubespray).
-
----
-
-# 🌐 Deploying NGINX Ingress Controller (NodePort) for Traffic Testing
+# Deploying NGINX Ingress Controller (NodePort) for Traffic Testing
 
 This guide installs the **NGINX Ingress Controller** using **Helm**, configured to expose HTTP and HTTPS traffic via **NodePort** services.
 
----
-
-## 📋 Requirements
+## Requirements
 
 * Kubernetes cluster is already running and reachable.
 * Helm is installed on your control machine (`helm version`).
 * Nodes in your cluster expose **ports 30080 (HTTP)** and **30443 (HTTPS)** to the outside (e.g., via HAProxy or direct access).
 
----
-
-## 📁 Step 1: Add the Ingress-NGINX Helm Repository
+## Step 1: Add the Ingress-NGINX Helm Repository
 
 ```bash
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 helm repo update
 ```
 
----
-
-## 🚀 Step 2: Install the Ingress Controller using NodePort
+## Step 2: Install the Ingress Controller using NodePort
 
 ```bash
 helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
@@ -42,9 +32,8 @@ This will:
 * Deploy the controller
 * Expose HTTP on `NodePort 30080` and HTTPS on `30443`
 
----
 
-## ✅ Step 3: Verify the Deployment
+## Step 3: Verify the Deployment
 
 ```bash
 kubectl get all -n ingress-nginx
@@ -63,9 +52,7 @@ NAME                       TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)      
 ingress-nginx-controller   NodePort   10.x.x.x       <none>        80:30080/TCP,443:30443/TCP   2m
 ```
 
----
-
-## 🧪 Step 4: Deploy a Sample App with Ingress
+## Step 4: Deploy a Sample App with Ingress
 
 Create a file `ingress-demo.yaml`:
 
@@ -130,9 +117,7 @@ Apply it:
 kubectl apply -f ingress-demo.yaml
 ```
 
----
-
-## 🖥 Step 5: Add Host Entry for Testing
+## Step 5: Add Host Entry for Testing
 
 On your **local machine** (host), add to `/etc/hosts`:
 
@@ -142,9 +127,7 @@ On your **local machine** (host), add to `/etc/hosts`:
 
 > Replace `192.168.56.17` with the IP of the HAProxy node or any worker node exposing port `30080`.
 
----
-
-## 🌐 Step 6: Test HTTP Access
+## Step 6: Test HTTP Access
 
 ```bash
 curl http://httpd.local
@@ -158,9 +141,7 @@ Or open in browser:
 http://httpd.local
 ```
 
----
-
-## ✅ Summary
+## Summary
 
 | Purpose              | Value             |
 | -------------------- | ----------------- |
